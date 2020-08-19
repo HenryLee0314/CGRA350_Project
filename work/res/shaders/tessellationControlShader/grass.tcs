@@ -1,0 +1,24 @@
+#version 410 core
+
+layout(vertices = 4) out;
+
+// in vec3 vsFragPos[];
+// in vec2 vsTexCoord[];
+
+// out vec3 tcsFragPos[];
+// out vec2 tcsTexCoord[];
+
+void main(void)
+{
+	gl_TessLevelOuter[0] = 1;
+
+
+    //gl_TessLevelOuter[0] = 100.0;
+    gl_TessLevelOuter[1] = 10;
+    // gl_TessLevelOuter[2] = 100.0;
+    // gl_TessLevelOuter[3] = 100.0;
+
+    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    // tcsFragPos[gl_InvocationID] = vsFragPos[gl_InvocationID];
+    // tcsTexCoord[gl_InvocationID] = vsTexCoord[gl_InvocationID];
+}

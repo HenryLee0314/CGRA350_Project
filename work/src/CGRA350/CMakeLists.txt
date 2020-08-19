@@ -1,7 +1,8 @@
 # Source files
 set(sources
-	"sphere_model.h"
-    "sphere_model.cpp"
+
+    "grass.h"
+    "grass.cpp"
 
 	"CMakeLists.txt"
 )

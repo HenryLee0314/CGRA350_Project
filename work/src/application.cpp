@@ -16,7 +16,7 @@
 #include "cgra/cgra_shader.hpp"
 #include "cgra/cgra_wavefront.hpp"
 
-#include "sphere_model.h"
+#include "cgra_log.h"
 
 
 using namespace std;
@@ -40,9 +40,7 @@ using namespace CGRA350;
 Application::Application(GLFWwindow *window)
 	: m_window(window)
 	, _camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f))
-
-	, _shader(CGRA_SRCDIR "/res/shaders/vertexShader/CGRA350_A1_P1.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/CGRA350_A1_P1.fs")
-
+	, _grassShader(CGRA_SRCDIR "/res/shaders/vertexShader/grass.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/grass.fs", CGRA_SRCDIR "/res/shaders/geometryShader/grass.gs", CGRA_SRCDIR "/res/shaders/tessellationControlShader/grass.tcs", CGRA_SRCDIR "/res/shaders/tessellationEvaluationShader/grass.tes")
 {
 
 	// shader_builder sb;
@@ -96,22 +94,23 @@ void Application::render() {
 	if (m_show_grid) drawGrid(view, proj);
 	if (m_show_axis) drawAxis(view, proj);
 	glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
+	(m_showWireframe) ? glEnable(GL_PROGRAM_POINT_SIZE) : glDisable(GL_PROGRAM_POINT_SIZE);
+
 
 
 	// draw the model
 	// m_model.draw(view, proj);
 
+	_grassShader.use();
+	_grassShader.setMat4("model", model);
+	_grassShader.setMat4("view", view);
+	_grassShader.setMat4("projection", proj);
 
-	_shader.use();
-	_shader.setMat4("model", model);
-	_shader.setMat4("view", view);
-	_shader.setMat4("projection", proj);
-
-	_shader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-	_shader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-	_shader.setVec3("lightPos", m_lightPosition);
-	_shader.setVec3("viewPos", _camera.getPosition());
-	Sphere::getInstance()->render();
+	_grassShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
+	_grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+	_grassShader.setVec3("lightPos", m_lightPosition);
+	_grassShader.setVec3("viewPos", _camera.getPosition());
+	_grass.render();
 }
 
 
@@ -140,7 +139,7 @@ void Application::renderGUI() {
 	ImGui::Separator();
 
 	// example of how to use input boxes
-	Sphere::getInstance()->renderGUI();
+	_grass.renderGUI();
 
 	// finish creating window
 	ImGui::End();

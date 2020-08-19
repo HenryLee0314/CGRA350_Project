@@ -1,0 +1,58 @@
+#version 410 core
+
+layout(isolines, equal_spacing, ccw) in;
+
+// in vec3 tcsFragPos[];
+// in vec2 tcsTexCoord[];
+
+// out vec3 tesFragPos;
+// out vec2 tesTexCoord;
+
+// vec4 interpolateV4(in vec4 v0, in vec4 v1, in vec4 v2, in vec4 v3)
+// {
+//     vec4 a = mix(v0, v1, gl_TessCoord.x);
+//     vec4 b = mix(v3, v2, gl_TessCoord.x);
+//     return mix(a, b, gl_TessCoord.y);
+// }
+
+vec4 curve(in vec4 v0, in vec4 v1, in vec4 v2, in vec4 v3)
+{
+    // vec4 a = mix(v0, v1, gl_TessCoord.x);
+    // vec4 b = mix(v3, v2, gl_TessCoord.x);
+    return mix(v0, v3, gl_TessCoord.x);
+}
+
+vec4 bezier(float u, vec4 p0, vec4 p1, vec4 p2, vec4 p3)
+{
+    float B0 = (1.-u)*(1.-u)*(1.-u);
+    float B1 = 3.*u*(1.-u)*(1.-u);
+    float B2 = 3.*u*u*(1.-u);
+    float B3 = u*u*u;
+
+    vec4 p = B0*p0 + B1*p1 + B2*p2 + B3*p3;
+    return p;
+}
+
+// vec3 interpolateV3(in vec3 v0, in vec3 v1, in vec3 v2, in vec3 v3)
+// {
+//     vec3 a = mix(v0, v1, gl_TessCoord.x);
+//     vec3 b = mix(v3, v2, gl_TessCoord.x);
+//     return mix(a, b, gl_TessCoord.y);
+// }
+
+// vec2 interpolateV2(in vec2 v0, in vec2 v1, in vec2 v2, in vec2 v3)
+// {
+//     vec2 a = mix(v0, v1, gl_TessCoord.x);
+//     vec2 b = mix(v3, v2, gl_TessCoord.x);
+//     return mix(a, b, gl_TessCoord.y);
+// }
+
+void main()
+{
+    float u = gl_TessCoord.x;
+    gl_Position = bezier(u, gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[2].gl_Position, gl_in[3].gl_Position);
+    //gl_Position = curve(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[2].gl_Position, gl_in[3].gl_Position);
+
+    // tesFragPos = interpolateV3(tcsFragPos[0], tcsFragPos[1], tcsFragPos[2], tcsFragPos[3]);
+    // tesTexCoord = interpolateV2(tcsTexCoord[0], tcsTexCoord[1], tcsTexCoord[2], tcsTexCoord[3]);
+}
