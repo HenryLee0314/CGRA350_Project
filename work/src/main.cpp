@@ -9,6 +9,10 @@
 #include "opengl.hpp"
 #include "cgra/cgra_gui.hpp"
 
+#include "cgra_log.h"
+#include "cgra_heap_calculator.h"
+#include "cgra_time_calculator.h"
+
 
 using namespace std;
 using namespace cgra;
@@ -16,21 +20,21 @@ using namespace cgra;
 
 // forward decleration for cleanliness
 namespace {
-	void cursorPosCallback(GLFWwindow *, double xpos, double ypos);
-	void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods);
-	void scrollCallback(GLFWwindow *win, double xoffset, double yoffset);
-	void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods);
-	void charCallback(GLFWwindow *win, unsigned int c);
-	void APIENTRY debugCallback(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar*, GLvoid*);
+void cursorPosCallback(GLFWwindow *, double xpos, double ypos);
+void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods);
+void scrollCallback(GLFWwindow *win, double xoffset, double yoffset);
+void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods);
+void charCallback(GLFWwindow *win, unsigned int c);
+void APIENTRY debugCallback(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar*, GLvoid*);
 
-	// global static pointer to application once we create it
-	// nessesary for interfacing with the GLFW callbacks
-	Application *application_ptr = nullptr;
+// global static pointer to application once we create it
+// nessesary for interfacing with the GLFW callbacks
+Application *application_ptr = nullptr;
 }
 
 
 // main program
-// 
+//
 int main() {
 
 	// initialize the GLFW library
@@ -106,7 +110,7 @@ int main() {
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCharCallback(window, charCallback);
 
-	
+
 	// create the application object (and a global pointer to it)
 	Application application(window);
 	application_ptr = &application;
@@ -134,130 +138,133 @@ int main() {
 	// clean up ImGui
 	cgra::gui::shutdown();
 	glfwTerminate();
+
+	CGRA_SHOW_HEAP_CALCULATOR_RESULT();
+	CGRA_SHOW_TIME_CALCULATOR_RESULT();
 }
 
 
 namespace {
 
-	void cursorPosCallback(GLFWwindow *, double xpos, double ypos) {
-		// if not captured then foward to application
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.WantCaptureMouse) return;
-		application_ptr->cursorPosCallback(xpos, ypos);
+void cursorPosCallback(GLFWwindow *, double xpos, double ypos) {
+	// if not captured then foward to application
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureMouse) return;
+	application_ptr->cursorPosCallback(xpos, ypos);
+}
+
+
+void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
+	// forward callback to ImGui
+	cgra::gui::mouseButtonCallback(win, button, action, mods);
+
+	// if not captured then foward to application
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureMouse) return;
+	application_ptr->mouseButtonCallback(button, action, mods);
+}
+
+
+void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
+	// forward callback to ImGui
+	cgra::gui::scrollCallback(win, xoffset, yoffset);
+
+	// if not captured then foward to application
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureMouse) return;
+	application_ptr->scrollCallback(xoffset, yoffset);
+}
+
+
+void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
+	// forward callback to ImGui
+	cgra::gui::keyCallback(win, key, scancode, action, mods);
+
+	// if not captured then foward to application
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.WantCaptureKeyboard) return;
+	application_ptr->keyCallback(key, scancode, action, mods);
+}
+
+
+void charCallback(GLFWwindow *win, unsigned int c) {
+	// forward callback to ImGui
+	cgra::gui::charCallback(win, c);
+
+	// if not captured then foward to application
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.WantTextInput) return;
+	application_ptr->charCallback(c);
+}
+
+
+// function to translate source to string
+const char * getStringForSource(GLenum source) {
+	switch (source) {
+	case GL_DEBUG_SOURCE_API:
+		return "API";
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+		return "Window System";
+	case GL_DEBUG_SOURCE_SHADER_COMPILER:
+		return "Shader Compiler";
+	case GL_DEBUG_SOURCE_THIRD_PARTY:
+		return "Third Party";
+	case GL_DEBUG_SOURCE_APPLICATION:
+		return "Application";
+	case GL_DEBUG_SOURCE_OTHER:
+		return "Other";
+	default:
+		return "n/a";
 	}
+}
 
-
-	void mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
-		// forward callback to ImGui
-		cgra::gui::mouseButtonCallback(win, button, action, mods);
-
-		// if not captured then foward to application
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.WantCaptureMouse) return;
-		application_ptr->mouseButtonCallback(button, action, mods);
+// function to translate severity to string
+const char * getStringForSeverity(GLenum severity) {
+	switch (severity) {
+	case GL_DEBUG_SEVERITY_HIGH:
+		return "High";
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		return "Medium";
+	case GL_DEBUG_SEVERITY_LOW:
+		return "Low";
+	case GL_DEBUG_SEVERITY_NOTIFICATION:
+		return "None";
+	default:
+		return "n/a";
 	}
+}
 
-
-	void scrollCallback(GLFWwindow *win, double xoffset, double yoffset) {
-		// forward callback to ImGui
-		cgra::gui::scrollCallback(win, xoffset, yoffset);
-
-		// if not captured then foward to application
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.WantCaptureMouse) return;
-		application_ptr->scrollCallback(xoffset, yoffset);
+// function to translate type to string
+const char * getStringForType(GLenum type) {
+	switch (type) {
+	case GL_DEBUG_TYPE_ERROR:
+		return "Error";
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		return "Deprecated Behaviour";
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		return "Undefined Behaviour";
+	case GL_DEBUG_TYPE_PORTABILITY:
+		return "Portability";
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		return "Performance";
+	case GL_DEBUG_TYPE_OTHER:
+		return "Other";
+	default:
+		return "n/a";
 	}
+}
 
+// actually define the function
+void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar* message, GLvoid*) {
+	// Don't report notification messages
+	if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
 
-	void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
-		// forward callback to ImGui
-		cgra::gui::keyCallback(win, key, scancode, action, mods);
+	// nvidia: avoid debug spam about attribute offsets
+	if (id == 131076) return;
 
-		// if not captured then foward to application
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.WantCaptureKeyboard) return;
-		application_ptr->keyCallback(key, scancode, action, mods);
-	}
+	cerr << "GL [" << getStringForSource(source) << "] " << getStringForType(type) << ' ' << id << " : ";
+	cerr << message << " (Severity: " << getStringForSeverity(severity) << ')' << endl;
 
-
-	void charCallback(GLFWwindow *win, unsigned int c) {
-		// forward callback to ImGui
-		cgra::gui::charCallback(win, c);
-
-		// if not captured then foward to application
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.WantTextInput) return;
-		application_ptr->charCallback(c);
-	}
-
-
-	// function to translate source to string
-	const char * getStringForSource(GLenum source) {
-		switch (source) {
-		case GL_DEBUG_SOURCE_API:
-			return "API";
-		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-			return "Window System";
-		case GL_DEBUG_SOURCE_SHADER_COMPILER:
-			return "Shader Compiler";
-		case GL_DEBUG_SOURCE_THIRD_PARTY:
-			return "Third Party";
-		case GL_DEBUG_SOURCE_APPLICATION:
-			return "Application";
-		case GL_DEBUG_SOURCE_OTHER:
-			return "Other";
-		default:
-			return "n/a";
-		}
-	}
-
-	// function to translate severity to string
-	const char * getStringForSeverity(GLenum severity) {
-		switch (severity) {
-		case GL_DEBUG_SEVERITY_HIGH:
-			return "High";
-		case GL_DEBUG_SEVERITY_MEDIUM:
-			return "Medium";
-		case GL_DEBUG_SEVERITY_LOW:
-			return "Low";
-		case GL_DEBUG_SEVERITY_NOTIFICATION:
-			return "None";
-		default:
-			return "n/a";
-		}
-	}
-
-	// function to translate type to string
-	const char * getStringForType(GLenum type) {
-		switch (type) {
-		case GL_DEBUG_TYPE_ERROR:
-			return "Error";
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-			return "Deprecated Behaviour";
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-			return "Undefined Behaviour";
-		case GL_DEBUG_TYPE_PORTABILITY:
-			return "Portability";
-		case GL_DEBUG_TYPE_PERFORMANCE:
-			return "Performance";
-		case GL_DEBUG_TYPE_OTHER:
-			return "Other";
-		default:
-			return "n/a";
-		}
-	}
-
-	// actually define the function
-	void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar* message, GLvoid*) {
-		// Don't report notification messages
-		if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return;
-
-		// nvidia: avoid debug spam about attribute offsets
-		if (id == 131076) return;
-
-		cerr << "GL [" << getStringForSource(source) << "] " << getStringForType(type) << ' ' << id << " : ";
-		cerr << message << " (Severity: " << getStringForSeverity(severity) << ')' << endl;
-
-		if (type == GL_DEBUG_TYPE_ERROR_ARB) throw runtime_error("GL Error: "s + message);
-	}
+	if (type == GL_DEBUG_TYPE_ERROR_ARB) throw runtime_error("GL Error: "s + message);
+}
 }

@@ -12,9 +12,9 @@ namespace CGRA350 {
 
 FluidGrid::FluidGrid()
 	: _cube(nullptr)
-	, _size(20)
-	, _diffusion(0.2)
-	, _viscosity(0.1)
+	, _size(50)
+	, _diffusion(0.0)
+	, _viscosity(0.001)
 	, _dt(1)
 	, _vertices(nullptr)
 	, _VAO(0)
@@ -54,14 +54,14 @@ void FluidGrid::addVelocity(int x, int y, int z, float amountX, float amountY, f
 
 void FluidGrid::renderGUI()
 {
-	static float amount = 500;
+	static float amount = 200;
 	static float vx = 10;
 	static float vy = 10;
 	static float vz = 10;
 
-	ImGui::SliderFloat("Diffusion", &_diffusion, 0.0f, 10.0f);
-	ImGui::SliderFloat("Viscosity", &_viscosity, 0.001f, 2.0f);
-	ImGui::SliderFloat("Amount", &amount, 0.0f, 1000.0f);
+	ImGui::SliderFloat("Diffusion", &_diffusion, 0.000f, 1.0f);
+	ImGui::SliderFloat("Viscosity", &_viscosity, 0.001f, 1.0f);
+	ImGui::SliderFloat("Amount", &amount, 0.0f, 500.0f);
 
 	ImGui::SliderFloat("Velocity X", &vx, -50.0f, 50.0f);
 	ImGui::SliderFloat("Velocity Y", &vy, -50.0f, 50.0f);
@@ -80,21 +80,26 @@ void FluidGrid::renderGUI()
 
 void FluidGrid::update()
 {
+	CGRA_ACTIVITY_START(CALCULATE_VOL);
 	FluidCubeStep(_cube);
+	CGRA_ACTIVITY_END(CALCULATE_VOL);
 
+	CGRA_ACTIVITY_START(SET_RENDER_DATA);
 	for (int i = 0; i < _size; ++i) {
 		for (int j = 0; j < _size; ++j) {
 			for (int k = 0; k < _size; ++k) {
 				int N = _size;
 				int index = IX(i, j, k);
-				_vertices[4 * index + 0] = i - (_size / 2);
-				_vertices[4 * index + 1] = j - (_size / 2);
-				_vertices[4 * index + 2] = k - (_size / 2);
+				_vertices[4 * index + 0] = (float(i) / (_size / 2) - 1) * 10;
+				_vertices[4 * index + 1] = (float(j) / (_size / 2) - 1) * 10;
+				_vertices[4 * index + 2] = (float(k) / (_size / 2) - 1) * 10;
 				_vertices[4 * index + 3] = _cube->density[index];
 			}
 		}
 	}
+	CGRA_ACTIVITY_END(SET_RENDER_DATA);
 
+	CGRA_ACTIVITY_START(SET_OPENGL_BUFFER);
 	glBindVertexArray(_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
 	glBufferData(GL_ARRAY_BUFFER, _size * _size * _size * 4 * sizeof(float), _vertices, GL_STATIC_DRAW);
@@ -103,13 +108,16 @@ void FluidGrid::update()
 	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 	glBindVertexArray(0);
+	CGRA_ACTIVITY_END(SET_OPENGL_BUFFER);
 }
 
 void FluidGrid::render()
 {
+	CGRA_ACTIVITY_START(RENDER_VOL_DATA);
 	glBindVertexArray(_VAO);
 	glDrawArrays(GL_POINTS, 0, _size * _size * _size);
 	glBindVertexArray(0);
+	CGRA_ACTIVITY_END(RENDER_VOL_DATA);
 }
 
 
