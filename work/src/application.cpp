@@ -41,6 +41,8 @@ Application::Application(GLFWwindow *window)
 	: m_window(window)
 	, _camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f))
 	, _grassShader(CGRA_SRCDIR "/res/shaders/vertexShader/grass.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/grass.fs", CGRA_SRCDIR "/res/shaders/geometryShader/grass.gs", CGRA_SRCDIR "/res/shaders/tessellationControlShader/grass.tcs", CGRA_SRCDIR "/res/shaders/tessellationEvaluationShader/grass.tes")
+	, _fluidShader(CGRA_SRCDIR "/res/shaders/vertexShader/fluid.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/fluid.fs")
+	, _fluidGrid()
 {
 
 	// shader_builder sb;
@@ -101,16 +103,35 @@ void Application::render() {
 	// draw the model
 	// m_model.draw(view, proj);
 
-	_grassShader.use();
-	_grassShader.setMat4("model", model);
-	_grassShader.setMat4("view", view);
-	_grassShader.setMat4("projection", proj);
+	// _grassShader.use();
+	// _grassShader.setMat4("model", model);
+	// _grassShader.setMat4("view", view);
+	// _grassShader.setMat4("projection", proj);
 
-	_grassShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-	_grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-	_grassShader.setVec3("lightPos", m_lightPosition);
-	_grassShader.setVec3("viewPos", _camera.getPosition());
-	_grass.render();
+	// _grassShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
+	// _grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+	// _grassShader.setVec3("lightPos", m_lightPosition);
+	// _grassShader.setVec3("viewPos", _camera.getPosition());
+	// _grass.render();
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	_fluidGrid.update();
+
+	_fluidShader.use();
+	_fluidShader.setMat4("model", model);
+	_fluidShader.setMat4("view", view);
+	_fluidShader.setMat4("projection", proj);
+
+	_fluidShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
+	_fluidShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+	_fluidShader.setVec3("lightPos", m_lightPosition);
+	_fluidShader.setVec3("viewPos", _camera.getPosition());
+	_fluidGrid.render();
+	glEnable(GL_DEPTH_TEST);
+
+
 }
 
 
@@ -139,7 +160,8 @@ void Application::renderGUI() {
 	ImGui::Separator();
 
 	// example of how to use input boxes
-	_grass.renderGUI();
+	//_grass.renderGUI();
+	_fluidGrid.renderGUI();
 
 	// finish creating window
 	ImGui::End();
