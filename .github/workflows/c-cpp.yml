@@ -1,0 +1,22 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: install dependencies
+      run: |
+        sudo apt-get install xorg-dev -y
+        sudo apt-get install freeglut3-dev
+
+    - name: compiling
+      run: mkdir build && cd build && cmake ../work && make -j8
