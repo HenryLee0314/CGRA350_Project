@@ -62,7 +62,10 @@ private:
 	CGRA350::Shader _fluidShader;
 
 	CGRA350::Grass _grass;
+	bool _enable_grass;
+
 	CGRA350::FluidGrid _fluidGrid;
+	bool _enable_fluidGrid;
 
 public:
 	// setup

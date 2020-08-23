@@ -43,16 +43,9 @@ Application::Application(GLFWwindow *window)
 	, _grassShader(CGRA_SRCDIR "/res/shaders/vertexShader/grass.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/grass.fs", CGRA_SRCDIR "/res/shaders/geometryShader/grass.gs", CGRA_SRCDIR "/res/shaders/tessellationControlShader/grass.tcs", CGRA_SRCDIR "/res/shaders/tessellationEvaluationShader/grass.tes")
 	, _fluidShader(CGRA_SRCDIR "/res/shaders/vertexShader/fluid.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/fluid.fs")
 	, _fluidGrid()
+	, _enable_grass(true)
+	, _enable_fluidGrid(false)
 {
-
-	// shader_builder sb;
-	// sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_vert.glsl"));
-	// sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//color_frag.glsl"));
-	// GLuint shader = sb.build();
-
-	// m_model.shader = shader;
-	// m_model.mesh = load_wavefront_data(CGRA_SRCDIR + std::string("/res//assets//teapot.obj")).build();
-	// m_model.color = vec3(1, 0, 0);
 
 	m_lightPosition = glm::vec3(3.0f, 3.0f, 3.0f);
 
@@ -101,37 +94,40 @@ void Application::render() {
 
 
 	// draw the model
-	// m_model.draw(view, proj);
+	//m_model.draw(view, proj);
 
-	// _grassShader.use();
-	// _grassShader.setMat4("model", model);
-	// _grassShader.setMat4("view", view);
-	// _grassShader.setMat4("projection", proj);
+	if (_enable_grass) {
+		_grassShader.use();
+		_grassShader.setMat4("model", model);
+		_grassShader.setMat4("view", view);
+		_grassShader.setMat4("projection", proj);
 
-	// _grassShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-	// _grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-	// _grassShader.setVec3("lightPos", m_lightPosition);
-	// _grassShader.setVec3("viewPos", _camera.getPosition());
-	// _grass.render();
+		_grassShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
+		_grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+		_grassShader.setVec3("lightPos", m_lightPosition);
+		_grassShader.setVec3("viewPos", _camera.getPosition());
+		_grass.render();
+	}
 
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	_fluidGrid.update();
+	if (_enable_fluidGrid) {
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		_fluidGrid.update();
 
-	_fluidShader.use();
-	_fluidShader.setMat4("model", model);
-	_fluidShader.setMat4("view", view);
-	_fluidShader.setMat4("projection", proj);
+		_fluidShader.use();
+		_fluidShader.setMat4("model", model);
+		_fluidShader.setMat4("view", view);
+		_fluidShader.setMat4("projection", proj);
 
-	_fluidShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-	_fluidShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-	_fluidShader.setVec3("lightPos", m_lightPosition);
-	_fluidShader.setVec3("viewPos", _camera.getPosition());
-	_fluidGrid.render();
-	glEnable(GL_DEPTH_TEST);
-
-
+		_fluidShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
+		_fluidShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+		_fluidShader.setVec3("lightPos", m_lightPosition);
+		_fluidShader.setVec3("viewPos", _camera.getPosition());
+		_fluidGrid.render();
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+	}
 }
 
 
@@ -156,12 +152,28 @@ void Application::renderGUI() {
 	ImGui::SameLine();
 	if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
 
+	if (ImGui::Button("Grass")) {
+		_enable_grass = true;
+		_enable_fluidGrid = false;
+	}
+
+	if (ImGui::Button("Fluid Grid")) {
+		_enable_grass = false;
+		_enable_fluidGrid = true;
+	}
+
 
 	ImGui::Separator();
 
 	// example of how to use input boxes
-	//_grass.renderGUI();
-	_fluidGrid.renderGUI();
+	if (_enable_grass) {
+		_grass.renderGUI();
+	}
+
+	if (_enable_fluidGrid) {
+		_fluidGrid.renderGUI();
+
+	}
 
 	// finish creating window
 	ImGui::End();
