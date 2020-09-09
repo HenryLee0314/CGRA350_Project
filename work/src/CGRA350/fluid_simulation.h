@@ -21,6 +21,9 @@ struct FluidCube {
     float *Vx0;
     float *Vy0;
     float *Vz0;
+
+    float *p;
+    float *div;
 };
 typedef struct FluidCube FluidCube;
 

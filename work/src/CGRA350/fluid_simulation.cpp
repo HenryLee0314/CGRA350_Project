@@ -32,6 +32,9 @@ FluidCube *FluidCubeCreate(int size, float diffusion, float viscosity, float dt)
 	cube->Vy0 = (float*)calloc(N * N * N, sizeof(float));
 	cube->Vz0 = (float*)calloc(N * N * N, sizeof(float));
 
+    cube->p = (float*)calloc(N * N * N, sizeof(float));
+    cube->div = (float*)calloc(N * N * N, sizeof(float));
+
 	return cube;
 }
 
@@ -48,6 +51,9 @@ void FluidCubeReset(FluidCube *cube)
     free(cube->Vy0);
     free(cube->Vz0);
 
+    free(cube->p);
+    free(cube->div);
+
     int N = cube->size;
 
     cube->s = (float*)calloc(N * N * N, sizeof(float));
@@ -61,6 +67,8 @@ void FluidCubeReset(FluidCube *cube)
     cube->Vy0 = (float*)calloc(N * N * N, sizeof(float));
     cube->Vz0 = (float*)calloc(N * N * N, sizeof(float));
 
+    cube->p = (float*)calloc(N * N * N, sizeof(float));
+    cube->div = (float*)calloc(N * N * N, sizeof(float));
 }
 
 void FluidCubeFree(FluidCube *cube)
@@ -75,6 +83,9 @@ void FluidCubeFree(FluidCube *cube)
     free(cube->Vx0);
     free(cube->Vy0);
     free(cube->Vz0);
+
+    free(cube->p);
+    free(cube->div);
 
     free(cube);
 }
@@ -165,7 +176,7 @@ static void lin_solve(int b, float *x, float *x0, float a, float c, int iter, in
     }
 }
 
-static void diffuse (int b, float *x, float *x0, float diff, float dt, int iter, int N)
+static void diffuse(int b, float *x, float *x0, float diff, float dt, int iter, int N)
 {
     float a = dt * diff * (N - 2) * (N - 2);
     lin_solve(b, x, x0, a, 1 + 6 * a, iter, N);
@@ -220,7 +231,7 @@ static void advect(int b, float *d, float *d0,  float *velocX, float *velocY, fl
     float s0, s1, t0, t1, u0, u1;
     float tmp1, tmp2, tmp3, x, y, z;
 
-    float Nfloat = N;
+    float Nfloat = N - 2;
     float ifloat, jfloat, kfloat;
     int i, j, k;
 
@@ -238,10 +249,12 @@ static void advect(int b, float *d, float *d0,  float *velocX, float *velocY, fl
                 if(x > Nfloat + 0.5f) x = Nfloat + 0.5f;
                 i0 = floorf(x);
                 i1 = i0 + 1.0f;
+
                 if(y < 0.5f) y = 0.5f;
                 if(y > Nfloat + 0.5f) y = Nfloat + 0.5f;
                 j0 = floorf(y);
                 j1 = j0 + 1.0f;
+
                 if(z < 0.5f) z = 0.5f;
                 if(z > Nfloat + 0.5f) z = Nfloat + 0.5f;
                 k0 = floorf(z);
@@ -249,15 +262,19 @@ static void advect(int b, float *d, float *d0,  float *velocX, float *velocY, fl
 
                 s1 = x - i0;
                 s0 = 1.0f - s1;
+
                 t1 = y - j0;
                 t0 = 1.0f - t1;
+
                 u1 = z - k0;
                 u0 = 1.0f - u1;
 
                 int i0i = i0;
                 int i1i = i1;
+
                 int j0i = j0;
                 int j1i = j1;
+
                 int k0i = k0;
                 int k1i = k1;
 
@@ -292,17 +309,20 @@ void FluidCubeStep(FluidCube *cube)
     float *s       = cube->s;
     float *density = cube->density;
 
+    float *p       = cube->p;
+    float *div       = cube->div;
+
     diffuse(1, Vx0, Vx, visc, dt, 4, N);
     diffuse(2, Vy0, Vy, visc, dt, 4, N);
     diffuse(3, Vz0, Vz, visc, dt, 4, N);
 
-    project(Vx0, Vy0, Vz0, Vx, Vy, 4, N);
+    project(Vx0, Vy0, Vz0, p, div, 4, N);
 
     advect(1, Vx, Vx0, Vx0, Vy0, Vz0, dt, N);
     advect(2, Vy, Vy0, Vx0, Vy0, Vz0, dt, N);
     advect(3, Vz, Vz0, Vx0, Vy0, Vz0, dt, N);
 
-    project(Vx, Vy, Vz, Vx0, Vy0, 4, N);
+    project(Vx, Vy, Vz, p, div, 4, N);
 
     diffuse(0, s, density, diff, dt, 4, N);
     advect(0, density, s, Vx, Vy, Vz, dt, N);
