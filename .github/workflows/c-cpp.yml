@@ -15,6 +15,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: install dependencies
       run: |
+        sudo apt-get update
         sudo apt-get install xorg-dev -y
         sudo apt-get install freeglut3-dev
 
