@@ -7,6 +7,8 @@
 #include <CL/cl.h>
 #endif
 
+#include <vector>
+
 namespace CGRA350 {
 
 class OpenclTask
@@ -20,7 +22,6 @@ public:
 
 protected:
 	cl_program program;
-	cl_kernel kernel;
 };
 
 } // namespace CGRA350

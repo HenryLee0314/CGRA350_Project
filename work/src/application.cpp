@@ -51,11 +51,11 @@ Application::Application(GLFWwindow *window)
 
 	m_lightPosition = glm::vec3(3.0f, 3.0f, 3.0f);
 
-	OpenclManager::getInstance();
+	// OpenclManager::getInstance();
 
-	OpenclTask task(CGRA_SRCDIR "/res/openCL/helloworld.cl");
+	// OpenclTask task(CGRA_SRCDIR "/res/openCL/helloworld.cl");
 
-	task.run();
+	// task.run();
 
 }
 

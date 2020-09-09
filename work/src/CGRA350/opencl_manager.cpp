@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #include "cgra_log.h"
+#include "cgra_heap_calculator.h"
+#include "cgra_time_calculator.h"
 
 namespace CGRA350 {
 
@@ -12,7 +14,7 @@ OpenclManager* OpenclManager::_instance = nullptr;
 OpenclManager* OpenclManager::getInstance()
 {
 	if (_instance == nullptr) {
-		_instance = new OpenclManager();
+		_instance = CGRA_NEW(OPENCL_INIT) OpenclManager();
 	}
 
 	return _instance;
@@ -24,6 +26,8 @@ OpenclManager::OpenclManager()
 	, context()
 	, commandQueue()
 {
+	CGRA_ACTIVITY_START(OPENCL_INIT);
+
 	/**Step 1: Getting platforms and choose an available one(first).*/
 	cl_uint numPlatforms = 0;
 	if (clGetPlatformIDs(0, NULL, &numPlatforms) != CL_SUCCESS)
@@ -34,10 +38,11 @@ OpenclManager::OpenclManager()
 	/**For clarity, choose the first available platform. */
 	if (numPlatforms > 0)
 	{
-		cl_platform_id* platforms = (cl_platform_id* )malloc(numPlatforms * sizeof(cl_platform_id));
+		cl_platform_id* platforms = (cl_platform_id* )CGRA_MALLOC(numPlatforms * sizeof(cl_platform_id), OPENCL_INIT);
 		clGetPlatformIDs(numPlatforms, platforms, NULL);
 		platform = platforms[0];
-		free(platforms);
+
+		CGRA_FREE(platforms);
 	}
 
 	/**Step 2:Query the platform and choose the first GPU device if has one.*/
@@ -45,7 +50,7 @@ OpenclManager::OpenclManager()
 	clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, NULL, &numDevices);
 	if (numDevices > 0) //GPU available.
 	{
-		devices = (cl_device_id*)malloc(numDevices * sizeof(cl_device_id));
+		devices = (cl_device_id*)CGRA_MALLOC(numDevices * sizeof(cl_device_id), OPENCL_INIT);
 		clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, NULL);
 	}
 
@@ -54,6 +59,8 @@ OpenclManager::OpenclManager()
 
 	/**Step 4: Creating command queue associate with the context.*/
 	commandQueue = clCreateCommandQueue(context, devices[0], 0, NULL);
+
+	CGRA_ACTIVITY_END(OPENCL_INIT);
 }
 
 
@@ -65,7 +72,7 @@ OpenclManager::~OpenclManager()
 
 	if (devices != NULL)
 	{
-		free(devices);
+		CGRA_FREE(devices);
 		devices = NULL;
 	}
 }

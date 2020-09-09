@@ -3,7 +3,13 @@
 
 #include <cstdint>
 
-#include "fluid_simulation.h"
+// #define __CPU_FLUID_SIMULATION__
+
+#ifdef __CPU_FLUID_SIMULATION__
+#include "cpu_fluid_simulation.h"
+#else
+#include "gpu_fluid_simulation.h"
+#endif
 
 namespace CGRA350 {
 
@@ -24,13 +30,18 @@ public:
 	void renderGUI();
 
 private:
-	FluidCube* _cube;
+#ifdef __CPU_FLUID_SIMULATION__
+	CPU_FluidCube* _cube;
+#else
+	GPU_FluidCube _cube;
+#endif
+
 	int _size;
 	float _diffusion;
 	float _viscosity;
 	float _dt;
 
-    float* _vertices;
+	float* _vertices;
 
 	uint32_t _VAO;
 	uint32_t _VBO;
