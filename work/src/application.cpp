@@ -17,6 +17,8 @@
 #include "cgra/cgra_wavefront.hpp"
 
 #include "cgra_log.h"
+#include "opencl_manager.h"
+#include "opencl_task.h"
 
 
 using namespace std;
@@ -48,6 +50,12 @@ Application::Application(GLFWwindow *window)
 {
 
 	m_lightPosition = glm::vec3(3.0f, 3.0f, 3.0f);
+
+	OpenclManager::getInstance();
+
+	OpenclTask task(CGRA_SRCDIR "/res/openCL/helloworld.cl");
+
+	task.run();
 
 }
 
