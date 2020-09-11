@@ -168,17 +168,17 @@ __kernel void advect(const int b, __global float *d, __global float *d0,  __glob
 
 		if (x < 0.5f) x = 0.5f;
 		if (x > Nfloat + 0.5f) x = Nfloat + 0.5f;
-		i0 = int(x);
+		i0 = (int)(x);
 		i1 = i0 + 1.0f;
 
 		if (y < 0.5f) y = 0.5f;
 		if (y > Nfloat + 0.5f) y = Nfloat + 0.5f;
-		j0 = int(y);
+		j0 = (int)(y);
 		j1 = j0 + 1.0f;
 
 		if (z < 0.5f) z = 0.5f;
 		if (z > Nfloat + 0.5f) z = Nfloat + 0.5f;
-		k0 = int(z);
+		k0 = (int)(z);
 		k1 = k0 + 1.0f;
 
 		s1 = x - i0;
