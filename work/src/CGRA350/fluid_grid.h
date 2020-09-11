@@ -30,12 +30,6 @@ public:
 	void renderGUI();
 
 private:
-#ifdef __CPU_FLUID_SIMULATION__
-	CPU_FluidCube* _cube;
-#else
-	GPU_FluidCube _cube;
-#endif
-
 	int _size;
 	float _diffusion;
 	float _viscosity;
@@ -45,6 +39,12 @@ private:
 
 	uint32_t _VAO;
 	uint32_t _VBO;
+
+#ifdef __CPU_FLUID_SIMULATION__
+	CPU_FluidCube* _cube;
+#else
+	GPU_FluidCube _cube;
+#endif
 
 };
 

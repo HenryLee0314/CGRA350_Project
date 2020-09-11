@@ -13,31 +13,30 @@
 namespace CGRA350 {
 
 FluidGrid::FluidGrid()
-#ifdef __CPU_FLUID_SIMULATION__
-	: _cube(nullptr)
-#else
-	: _cube(CGRA_SRCDIR "/res/openCL/fluid_simulation.cl", 50, 0.0, 0.001, 1)
-#endif
-	, _size(50)
+	: _size(50)
 	, _diffusion(0.0)
 	, _viscosity(0.001)
 	, _dt(1)
 	, _vertices(nullptr)
 	, _VAO(0)
 	, _VBO(0)
+#ifdef __CPU_FLUID_SIMULATION__
+	, _cube(nullptr)
+#else
+	, _cube(CGRA_SRCDIR "/res/openCL/fluid_simulation.cl", _size, _diffusion, _viscosity, _dt)
+#endif
 {
+
 #ifdef __CPU_FLUID_SIMULATION__
 	_cube = CPU_FluidCubeCreate(_size, _diffusion, _viscosity, _dt);
 #else
 	// nothing
-	_cube.run();
 #endif
+
 	glGenVertexArrays(1, &_VAO);
 	glGenBuffers(1, &_VBO);
 
 	_vertices = (float*)CGRA_CALLOC(_size * _size * _size * 4, sizeof(float), CGRA350);
-
-
 }
 
 FluidGrid::~FluidGrid()

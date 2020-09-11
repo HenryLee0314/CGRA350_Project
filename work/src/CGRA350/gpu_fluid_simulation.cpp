@@ -176,10 +176,14 @@ GPU_FluidCube::~GPU_FluidCube()
 
 	clReleaseKernel(k_project_0);
 	clReleaseKernel(k_project_1);
+
+	clReleaseKernel(k_addDensity);
+	clReleaseKernel(k_addVelocity);
 }
 
 void GPU_FluidCube::run()
 {
+	// nothing
 }
 
 void GPU_FluidCube::GPU_FluidCubeAddDensity(int x, int y, int z, float amount)
