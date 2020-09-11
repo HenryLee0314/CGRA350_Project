@@ -44,10 +44,6 @@ private:
 
 	float* density;
 
-	float* Vx;
-	float* Vy;
-	float* Vz;
-
 	cl_mem _cl_mem_s;
 	cl_mem _cl_mem_density;
 

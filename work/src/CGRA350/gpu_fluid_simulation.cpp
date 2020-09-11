@@ -286,6 +286,120 @@ void GPU_FluidCube::GPU_FluidCubeReset()
 	CGRA_FREE(density);
 
 	density = (float*)CGRA_CALLOC(_size * _size * _size, sizeof(float), GPU_FLUID_SIM);
+
+	clReleaseMemObject(_cl_mem_s);
+	clReleaseMemObject(_cl_mem_density);
+
+	clReleaseMemObject(_cl_mem_Vx);
+	clReleaseMemObject(_cl_mem_Vy);
+	clReleaseMemObject(_cl_mem_Vz);
+
+	clReleaseMemObject(_cl_mem_Vx0);
+	clReleaseMemObject(_cl_mem_Vy0);
+	clReleaseMemObject(_cl_mem_Vz0);
+
+	clReleaseMemObject(_cl_mem_p);
+	clReleaseMemObject(_cl_mem_div);
+
+	int N = _size;
+
+	_cl_mem_s = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
+	_cl_mem_density = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR , N * N * N * sizeof(float), (void*)density, NULL);
+
+	_cl_mem_Vx = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
+	_cl_mem_Vy = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
+	_cl_mem_Vz = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
+
+	_cl_mem_Vx0 = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
+	_cl_mem_Vy0 = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
+	_cl_mem_Vz0 = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
+
+	_cl_mem_p = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
+	_cl_mem_div = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
+
+	clSetKernelArg(k_diffuse_1, 0, sizeof(int), (void*)&_bnd_1);
+	clSetKernelArg(k_diffuse_1, 1, sizeof(cl_mem), (void*)&_cl_mem_Vx0);
+	clSetKernelArg(k_diffuse_1, 2, sizeof(cl_mem), (void*)&_cl_mem_Vx);
+	clSetKernelArg(k_diffuse_1, 3, sizeof(float), (void*)&_visc);
+	clSetKernelArg(k_diffuse_1, 4, sizeof(int), (void*)&_dt);
+	clSetKernelArg(k_diffuse_1, 5, sizeof(int), (void*)&_iter);
+	clSetKernelArg(k_diffuse_1, 6, sizeof(int), (void*)&_size);
+
+	clSetKernelArg(k_diffuse_2, 0, sizeof(int), (void*)&_bnd_2);
+	clSetKernelArg(k_diffuse_2, 1, sizeof(cl_mem), (void*)&_cl_mem_Vy0);
+	clSetKernelArg(k_diffuse_2, 2, sizeof(cl_mem), (void*)&_cl_mem_Vy);
+	clSetKernelArg(k_diffuse_2, 3, sizeof(float), (void*)&_visc);
+	clSetKernelArg(k_diffuse_2, 4, sizeof(int), (void*)&_dt);
+	clSetKernelArg(k_diffuse_2, 5, sizeof(int), (void*)&_iter);
+	clSetKernelArg(k_diffuse_2, 6, sizeof(int), (void*)&_size);
+
+	clSetKernelArg(k_diffuse_3, 0, sizeof(int), (void*)&_bnd_3);
+	clSetKernelArg(k_diffuse_3, 1, sizeof(cl_mem), (void*)&_cl_mem_Vz0);
+	clSetKernelArg(k_diffuse_3, 2, sizeof(cl_mem), (void*)&_cl_mem_Vz);
+	clSetKernelArg(k_diffuse_3, 3, sizeof(float), (void*)&_visc);
+	clSetKernelArg(k_diffuse_3, 4, sizeof(int), (void*)&_dt);
+	clSetKernelArg(k_diffuse_3, 5, sizeof(int), (void*)&_iter);
+	clSetKernelArg(k_diffuse_3, 6, sizeof(int), (void*)&_size);
+
+	clSetKernelArg(k_project_0, 0, sizeof(cl_mem), (void*)&_cl_mem_Vx0);
+	clSetKernelArg(k_project_0, 1, sizeof(cl_mem), (void*)&_cl_mem_Vy0);
+	clSetKernelArg(k_project_0, 2, sizeof(cl_mem), (void*)&_cl_mem_Vz0);
+	clSetKernelArg(k_project_0, 3, sizeof(cl_mem), (void*)&_cl_mem_p);
+	clSetKernelArg(k_project_0, 4, sizeof(cl_mem), (void*)&_cl_mem_div);
+	clSetKernelArg(k_project_0, 5, sizeof(int), (void*)&_iter);
+	clSetKernelArg(k_project_0, 6, sizeof(int), (void*)&_size);
+
+	clSetKernelArg(k_advect_1, 0, sizeof(int), (void*)&_bnd_1);
+	clSetKernelArg(k_advect_1, 1, sizeof(cl_mem), (void*)&_cl_mem_Vx);
+	clSetKernelArg(k_advect_1, 2, sizeof(cl_mem), (void*)&_cl_mem_Vx0);
+	clSetKernelArg(k_advect_1, 3, sizeof(cl_mem), (void*)&_cl_mem_Vx0);
+	clSetKernelArg(k_advect_1, 4, sizeof(cl_mem), (void*)&_cl_mem_Vy0);
+	clSetKernelArg(k_advect_1, 5, sizeof(cl_mem), (void*)&_cl_mem_Vz0);
+	clSetKernelArg(k_advect_1, 6, sizeof(int), (void*)&_dt);
+	clSetKernelArg(k_advect_1, 7, sizeof(int), (void*)&_size);
+
+	clSetKernelArg(k_advect_2, 0, sizeof(int), (void*)&_bnd_2);
+	clSetKernelArg(k_advect_2, 1, sizeof(cl_mem), (void*)&_cl_mem_Vy);
+	clSetKernelArg(k_advect_2, 2, sizeof(cl_mem), (void*)&_cl_mem_Vy0);
+	clSetKernelArg(k_advect_2, 3, sizeof(cl_mem), (void*)&_cl_mem_Vx0);
+	clSetKernelArg(k_advect_2, 4, sizeof(cl_mem), (void*)&_cl_mem_Vy0);
+	clSetKernelArg(k_advect_2, 5, sizeof(cl_mem), (void*)&_cl_mem_Vz0);
+	clSetKernelArg(k_advect_2, 6, sizeof(int), (void*)&_dt);
+	clSetKernelArg(k_advect_2, 7, sizeof(int), (void*)&_size);
+
+	clSetKernelArg(k_advect_3, 0, sizeof(int), (void*)&_bnd_3);
+	clSetKernelArg(k_advect_3, 1, sizeof(cl_mem), (void*)&_cl_mem_Vz);
+	clSetKernelArg(k_advect_3, 2, sizeof(cl_mem), (void*)&_cl_mem_Vz0);
+	clSetKernelArg(k_advect_3, 3, sizeof(cl_mem), (void*)&_cl_mem_Vx0);
+	clSetKernelArg(k_advect_3, 4, sizeof(cl_mem), (void*)&_cl_mem_Vy0);
+	clSetKernelArg(k_advect_3, 5, sizeof(cl_mem), (void*)&_cl_mem_Vz0);
+	clSetKernelArg(k_advect_3, 6, sizeof(int), (void*)&_dt);
+	clSetKernelArg(k_advect_3, 7, sizeof(int), (void*)&_size);
+
+	clSetKernelArg(k_project_1, 0, sizeof(cl_mem), (void*)&_cl_mem_Vx);
+	clSetKernelArg(k_project_1, 1, sizeof(cl_mem), (void*)&_cl_mem_Vy);
+	clSetKernelArg(k_project_1, 2, sizeof(cl_mem), (void*)&_cl_mem_Vz);
+	clSetKernelArg(k_project_1, 3, sizeof(cl_mem), (void*)&_cl_mem_p);
+	clSetKernelArg(k_project_1, 4, sizeof(cl_mem), (void*)&_cl_mem_div);
+	clSetKernelArg(k_project_1, 5, sizeof(int), (void*)&_iter);
+	clSetKernelArg(k_project_1, 6, sizeof(int), (void*)&_size);
+
+	clSetKernelArg(k_diffuse_0, 0, sizeof(int), (void*)&_bnd_0);
+	clSetKernelArg(k_diffuse_0, 1, sizeof(cl_mem), (void*)&_cl_mem_s);
+	clSetKernelArg(k_diffuse_0, 2, sizeof(cl_mem), (void*)&_cl_mem_density);
+	clSetKernelArg(k_diffuse_0, 3, sizeof(float), (void*)&_diff);
+	clSetKernelArg(k_diffuse_0, 4, sizeof(int), (void*)&_dt);
+	clSetKernelArg(k_diffuse_0, 5, sizeof(int), (void*)&_iter);
+	clSetKernelArg(k_diffuse_0, 6, sizeof(int), (void*)&_size);
+
+	clSetKernelArg(k_advect_0, 0, sizeof(int), (void*)&_bnd_0);
+	clSetKernelArg(k_advect_0, 1, sizeof(cl_mem), (void*)&_cl_mem_density);
+	clSetKernelArg(k_advect_0, 2, sizeof(cl_mem), (void*)&_cl_mem_s);
+	clSetKernelArg(k_advect_0, 3, sizeof(cl_mem), (void*)&_cl_mem_Vx);
+	clSetKernelArg(k_advect_0, 4, sizeof(cl_mem), (void*)&_cl_mem_Vy);
+	clSetKernelArg(k_advect_0, 5, sizeof(cl_mem), (void*)&_cl_mem_Vz);
+	clSetKernelArg(k_advect_0, 6, sizeof(int), (void*)&_dt);
+	clSetKernelArg(k_advect_0, 7, sizeof(int), (void*)&_size);
 }
 
 } // namespace CGRA350

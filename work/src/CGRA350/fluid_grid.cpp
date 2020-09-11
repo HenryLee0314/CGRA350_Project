@@ -83,6 +83,12 @@ void FluidGrid::renderGUI()
 	static float vy = 10;
 	static float vz = 10;
 
+#ifdef __CPU_FLUID_SIMULATION__
+	if (ImGui::Button("Reset")) CPU_FluidCubeReset(_cube);
+#else
+	if (ImGui::Button("Reset")) _cube.GPU_FluidCubeReset();
+#endif
+
 	ImGui::SliderFloat("Diffusion", &_diffusion, 0.000f, 1.0f);
 	ImGui::SliderFloat("Viscosity", &_viscosity, 0.001f, 1.0f);
 	ImGui::SliderFloat("Amount", &amount, 0.0f, 500.0f);
@@ -98,14 +104,9 @@ void FluidGrid::renderGUI()
 	_cube.setDiffusion(_diffusion);
 	_cube.setViscosity(_viscosity);
 #endif
+
 	addDensity(_size / 2, _size / 2, _size / 2, amount);
 	addVelocity(_size / 2, _size / 2, _size / 2, vx, vy, vz);
-#ifdef __CPU_FLUID_SIMULATION__
-	if (ImGui::Button("Reset")) CPU_FluidCubeReset(_cube);
-#else
-	if (ImGui::Button("Reset")) _cube.GPU_FluidCubeReset();
-#endif
-
 }
 
 void FluidGrid::update()
