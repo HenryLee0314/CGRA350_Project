@@ -10,6 +10,8 @@
 
 void* malloc_t(size_t size, UTILITY::moduleMember_t module);
 
+void* calloc_t(size_t number, size_t type_size, UTILITY::moduleMember_t module);
+
 void free_t(void* ptr);
 
 void* operator new (size_t size);
@@ -53,6 +55,8 @@ public:
     static heapCalculator* heap_calculator;
 
     void* malloc_t(size_t size, moduleMember_t module);
+
+    void* calloc_t(size_t number, size_t type_size, moduleMember_t module);
 
     void free_t(void* ptr);
 

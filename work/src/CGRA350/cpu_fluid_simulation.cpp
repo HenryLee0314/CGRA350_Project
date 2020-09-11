@@ -1,4 +1,4 @@
-#include "fluid_simulation.h"
+#include "cpu_fluid_simulation.h"
 
 #include <cmath>
 
@@ -6,14 +6,13 @@
 #include "cgra_heap_calculator.h"
 #include "cgra_time_calculator.h"
 
-
+#define IX(x, y, z) ((x) + (y) * N + (z) * N * N)
 
 namespace CGRA350 {
 
-
-FluidCube *FluidCubeCreate(int size, float diffusion, float viscosity, float dt)
+CPU_FluidCube* CPU_FluidCubeCreate(int size, float diffusion, float viscosity, float dt)
 {
-	FluidCube *cube = (FluidCube*)malloc(sizeof(*cube));
+	CPU_FluidCube* cube = (CPU_FluidCube*)CGRA_MALLOC(sizeof(*cube), CPU_FLUID_SIM);
 	int N = size;
 
 	cube->size = size;
@@ -21,82 +20,82 @@ FluidCube *FluidCubeCreate(int size, float diffusion, float viscosity, float dt)
 	cube->diff = diffusion;
 	cube->visc = viscosity;
 
-	cube->s = (float*)calloc(N * N * N, sizeof(float));
-	cube->density = (float*)calloc(N * N * N, sizeof(float));
+	cube->s = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+	cube->density = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
 
-	cube->Vx = (float*)calloc(N * N * N, sizeof(float));
-	cube->Vy = (float*)calloc(N * N * N, sizeof(float));
-	cube->Vz = (float*)calloc(N * N * N, sizeof(float));
+	cube->Vx = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+	cube->Vy = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+	cube->Vz = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
 
-	cube->Vx0 = (float*)calloc(N * N * N, sizeof(float));
-	cube->Vy0 = (float*)calloc(N * N * N, sizeof(float));
-	cube->Vz0 = (float*)calloc(N * N * N, sizeof(float));
+	cube->Vx0 = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+	cube->Vy0 = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+	cube->Vz0 = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
 
-    cube->p = (float*)calloc(N * N * N, sizeof(float));
-    cube->div = (float*)calloc(N * N * N, sizeof(float));
+    cube->p = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+    cube->div = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
 
 	return cube;
 }
 
-void FluidCubeReset(FluidCube *cube)
+void CPU_FluidCubeReset(CPU_FluidCube *cube)
 {
-    free(cube->s);
-    free(cube->density);
+    CGRA_FREE(cube->s);
+    CGRA_FREE(cube->density);
 
-    free(cube->Vx);
-    free(cube->Vy);
-    free(cube->Vz);
+    CGRA_FREE(cube->Vx);
+    CGRA_FREE(cube->Vy);
+    CGRA_FREE(cube->Vz);
 
-    free(cube->Vx0);
-    free(cube->Vy0);
-    free(cube->Vz0);
+    CGRA_FREE(cube->Vx0);
+    CGRA_FREE(cube->Vy0);
+    CGRA_FREE(cube->Vz0);
 
-    free(cube->p);
-    free(cube->div);
+    CGRA_FREE(cube->p);
+    CGRA_FREE(cube->div);
 
     int N = cube->size;
 
-    cube->s = (float*)calloc(N * N * N, sizeof(float));
-    cube->density = (float*)calloc(N * N * N, sizeof(float));
+    cube->s = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+    cube->density = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
 
-    cube->Vx = (float*)calloc(N * N * N, sizeof(float));
-    cube->Vy = (float*)calloc(N * N * N, sizeof(float));
-    cube->Vz = (float*)calloc(N * N * N, sizeof(float));
+    cube->Vx = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+    cube->Vy = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+    cube->Vz = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
 
-    cube->Vx0 = (float*)calloc(N * N * N, sizeof(float));
-    cube->Vy0 = (float*)calloc(N * N * N, sizeof(float));
-    cube->Vz0 = (float*)calloc(N * N * N, sizeof(float));
+    cube->Vx0 = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+    cube->Vy0 = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+    cube->Vz0 = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
 
-    cube->p = (float*)calloc(N * N * N, sizeof(float));
-    cube->div = (float*)calloc(N * N * N, sizeof(float));
+    cube->p = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
+    cube->div = (float*)CGRA_CALLOC(N * N * N, sizeof(float), CPU_FLUID_SIM);
 }
 
-void FluidCubeFree(FluidCube *cube)
+void CPU_FluidCubeFree(CPU_FluidCube *cube)
 {
-    free(cube->s);
-    free(cube->density);
+    CGRA_FREE(cube->s);
+    CGRA_FREE(cube->density);
 
-    free(cube->Vx);
-    free(cube->Vy);
-    free(cube->Vz);
+    CGRA_FREE(cube->Vx);
+    CGRA_FREE(cube->Vy);
+    CGRA_FREE(cube->Vz);
 
-    free(cube->Vx0);
-    free(cube->Vy0);
-    free(cube->Vz0);
+    CGRA_FREE(cube->Vx0);
+    CGRA_FREE(cube->Vy0);
+    CGRA_FREE(cube->Vz0);
 
-    free(cube->p);
-    free(cube->div);
+    CGRA_FREE(cube->p);
+    CGRA_FREE(cube->div);
 
-    free(cube);
+    CGRA_FREE(cube);
 }
 
-void FluidCubeAddDensity(FluidCube *cube, int x, int y, int z, float amount)
+void CPU_FluidCubeAddDensity(CPU_FluidCube *cube, int x, int y, int z, float amount)
 {
     int N = cube->size;
     cube->density[IX(x, y, z)] += amount;
 }
 
-void FluidCubeAddVelocity(FluidCube *cube, int x, int y, int z, float amountX, float amountY, float amountZ)
+void CPU_FluidCubeAddVelocity(CPU_FluidCube *cube, int x, int y, int z, float amountX, float amountY, float amountZ)
 {
     int N = cube->size;
     int index = IX(x, y, z);
@@ -294,8 +293,10 @@ static void advect(int b, float *d, float *d0,  float *velocX, float *velocY, fl
     set_bnd(b, d, N);
 }
 
-void FluidCubeStep(FluidCube *cube)
+void CPU_FluidCubeStep(CPU_FluidCube *cube)
 {
+    CGRA_ACTIVITY_START(CPU_FLUID_SIM);
+
     int N          = cube->size;
     float visc     = cube->visc;
     float diff     = cube->diff;
@@ -326,6 +327,8 @@ void FluidCubeStep(FluidCube *cube)
 
     diffuse(0, s, density, diff, dt, 4, N);
     advect(0, density, s, Vx, Vy, Vz, dt, N);
+
+    CGRA_ACTIVITY_END(CPU_FLUID_SIM);
 }
 
 

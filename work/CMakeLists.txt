@@ -52,7 +52,15 @@ if (OPENMP_FOUND)
 	add_definitions(-DCGRA_HAVE_OPENMP)
 endif()
 
+#########################################################
+# Find OpenCL
+#########################################################
+FIND_PACKAGE(OpenCL REQUIRED)
+INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIRS})
 
+MESSAGE(STATUS "OpenCL library status:")
+MESSAGE(STATUS "---- libraries: ${OpenCL_LIBRARY}")
+MESSAGE(STATUS "---- include path: ${OpenCL_INCLUDE_DIRS}")
 
 #########################################################
 # Include Subprojects

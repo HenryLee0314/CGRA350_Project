@@ -89,6 +89,43 @@ void* heapCalculator::malloc_t(size_t size, moduleMember_t module) {
     return buffer;
 }
 
+void* heapCalculator::calloc_t(size_t number, size_t type_size, moduleMember_t module) {
+    void* buffer = nullptr;
+    char* head = nullptr;
+    heap_block_info_t* block_info = nullptr;
+
+    size_t size = number * type_size;
+    buffer = malloc(size + HEAP_BLOCK_INFO_SIZE);
+    head = (char*) buffer;
+
+    buffer = (void*) (head + HEAP_BLOCK_INFO_SIZE);
+    memset(buffer, 0, size);
+
+    block_info = (heap_block_info_t*) head;
+    block_info->size = size;
+    block_info->module = module;
+
+    if (heap_calculator_init_complete == true) {
+        heap_calculator_activity[module]->increase_heap(size);
+        current_heap_size += size;
+        ++current_block_num;
+    } else {
+        static_heap_size += size;
+        current_heap_size += size;
+        ++current_block_num;
+    }
+
+    if (current_heap_size > max_heap_size) {
+        max_heap_size = current_heap_size;
+    }
+
+    if (current_block_num > max_block_num) {
+        max_block_num = current_block_num;
+    }
+
+    return buffer;
+}
+
 void heapCalculator::free_t(void* ptr) {
     char* head = nullptr;
     moduleMember_t module;
@@ -129,6 +166,10 @@ heapCalculator* heapCalculator::heap_calculator = new heapCalculator();
 
 void* malloc_t(size_t size, UTILITY::moduleMember_t module) {
     return UTILITY::heapCalculator::heap_calculator->malloc_t(size, module);
+}
+
+void* calloc_t(size_t number, size_t type_size, UTILITY::moduleMember_t module) {
+    return UTILITY::heapCalculator::heap_calculator->calloc_t(number, type_size, module);
 }
 
 void free_t(void* ptr) {

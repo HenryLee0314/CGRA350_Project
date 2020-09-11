@@ -4,11 +4,19 @@ set(sources
     "grass.h"
     "grass.cpp"
 
-    "fluid_simulation.h"
-    "fluid_simulation.cpp"
+    "cpu_fluid_simulation.h"
+    "cpu_fluid_simulation.cpp"
 
     "fluid_grid.h"
     "fluid_grid.cpp"
+
+    "opencl_manager.h"
+    "opencl_manager.cpp"
+    "opencl_task.h"
+    "opencl_task.cpp"
+
+    "gpu_fluid_simulation.h"
+    "gpu_fluid_simulation.cpp"
 
 	"CMakeLists.txt"
 )
