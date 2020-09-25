@@ -3,7 +3,7 @@ int IX(int x, int y, int z, int N)
 	return ((x) + (y) * N + (z) * N * N);
 }
 
-void set_bnd(int b, __global float *x, int N)
+void set_bnd(int b, __global float* x, int N)
 {
 	const int i = get_global_id(0);
 	const int j = get_global_id(1);
@@ -25,30 +25,37 @@ void set_bnd(int b, __global float *x, int N)
 		x[IX(N - 1, j, k, N)] = b == 1 ? -x[IX(N - 2, j, k, N)] : x[IX(N - 2, j, k, N)];
 	}
 
-	x[IX(0    , 0    , 0    , N)] = 0.33f * (x[IX(1    , 0    , 0    , N)]
-	                                + x[IX(0    , 1    , 0    , N)]
-	                                + x[IX(0    , 0    , 1    , N)]);
-	x[IX(0    , N - 1, 0    , N)] = 0.33f * (x[IX(1    , N - 1, 0    , N)]
-	                                + x[IX(0    , N - 2, 0    , N)]
-	                                + x[IX(0    , N - 1, 1    , N)]);
-	x[IX(0    , 0    , N - 1, N)] = 0.33f * (x[IX(1    , 0    , N - 1, N)]
-	                                + x[IX(0    , 1    , N - 1, N)]
-	                                + x[IX(0    , 0    , N    , N)]);
-	x[IX(0    , N - 1, N - 1, N)] = 0.33f * (x[IX(1    , N - 1, N - 1, N)]
-	                                + x[IX(0    , N - 2, N - 1, N)]
-	                                + x[IX(0    , N - 1, N - 2, N)]);
-	x[IX(N - 1, 0    , 0    , N)] = 0.33f * (x[IX(N - 2, 0    , 0    , N)]
-	                                + x[IX(N - 1, 1    , 0    , N)]
-	                                + x[IX(N - 1, 0    , 1    , N)]);
-	x[IX(N - 1, N - 1, 0    , N)] = 0.33f * (x[IX(N - 2, N - 1, 0    , N)]
-	                                + x[IX(N - 1, N - 2, 0    , N)]
-	                                + x[IX(N - 1, N - 1, 1    , N)]);
-	x[IX(N - 1, 0    , N - 1, N)] = 0.33f * (x[IX(N - 2, 0    , N - 1, N)]
-	                                + x[IX(N - 1, 1    , N - 1, N)]
-	                                + x[IX(N - 1, 0    , N - 2, N)]);
-	x[IX(N - 1, N - 1, N - 1, N)] = 0.33f * (x[IX(N - 2, N - 1, N - 1, N)]
-	                                + x[IX(N - 1, N - 2, N - 1, N)]
-	                                + x[IX(N - 1, N - 1, N - 2, N)]);
+	if (i == 0 && j == 0 && k == 0) {
+		x[IX(0    , 0    , 0    , N)] = 0.33f * (x[IX(1    , 0    , 0    , N)] + x[IX(0    , 1    , 0    , N)] + x[IX(0    , 0    , 1    , N)]);
+	}
+
+	if (i == 0 && j == N - 1 && k == 0) {
+		x[IX(0    , N - 1, 0    , N)] = 0.33f * (x[IX(1    , N - 1, 0    , N)] + x[IX(0    , N - 2, 0    , N)] + x[IX(0    , N - 1, 1    , N)]);
+	}
+
+	if (i == 0 && j == 0 && k == N - 1) {
+		x[IX(0    , 0    , N - 1, N)] = 0.33f * (x[IX(1    , 0    , N - 1, N)] + x[IX(0    , 1    , N - 1, N)] + x[IX(0    , 0    , N    , N)]);
+	}
+
+	if (i == 0 && j == N - 1 && k == N - 1) {
+		x[IX(0    , N - 1, N - 1, N)] = 0.33f * (x[IX(1    , N - 1, N - 1, N)] + x[IX(0    , N - 2, N - 1, N)] + x[IX(0    , N - 1, N - 2, N)]);
+	}
+
+	if (i == N - 1 && j == 0 && k == 0) {
+		x[IX(N - 1, 0    , 0    , N)] = 0.33f * (x[IX(N - 2, 0    , 0    , N)] + x[IX(N - 1, 1    , 0    , N)] + x[IX(N - 1, 0    , 1    , N)]);
+	}
+
+	if (i == N - 1 && j == N - 1 && k == 0) {
+		x[IX(N - 1, N - 1, 0    , N)] = 0.33f * (x[IX(N - 2, N - 1, 0    , N)] + x[IX(N - 1, N - 2, 0    , N)] + x[IX(N - 1, N - 1, 1    , N)]);
+	}
+
+	if (i == N - 1 && j == 0 && k == N - 1) {
+		x[IX(N - 1, 0    , N - 1, N)] = 0.33f * (x[IX(N - 2, 0    , N - 1, N)] + x[IX(N - 1, 1    , N - 1, N)] + x[IX(N - 1, 0    , N - 2, N)]);
+	}
+
+	if (i == N - 1 && j == N - 1 && k == N - 1) {
+		x[IX(N - 1, N - 1, N - 1, N)] = 0.33f * (x[IX(N - 2, N - 1, N - 1, N)] + x[IX(N - 1, N - 2, N - 1, N)] + x[IX(N - 1, N - 1, N - 2, N)]);
+	}
 }
 
 void lin_solve(int b, __global float* x, __global float* x0, float a, float c, int iter, int N)
@@ -96,13 +103,13 @@ __kernel void addVelocity(const int x, const int y, const int z, const float amo
 	}
 }
 
-__kernel void diffuse(const int b, __global float *x, __global float *x0, const float diff, const float dt, const int iter, const int N)
+__kernel void diffuse(const int b, __global float* x, __global float* x0, const float diff, const float dt, const int iter, const int N)
 {
 	float a = dt * diff * (N - 2) * (N - 2);
 	lin_solve(b, x, x0, a, 1 + 6 * a, iter, N);
 }
 
-__kernel void project(__global float *velocX, __global float *velocY, __global float *velocZ, __global float *p, __global float *div, const int iter, const int N)
+__kernel void project(__global float* velocX, __global float* velocY, __global float* velocZ, __global float* p, __global float* div, const int iter, const int N)
 {
 	const int i = get_global_id(0);
 	const int j = get_global_id(1);
@@ -138,7 +145,7 @@ __kernel void project(__global float *velocX, __global float *velocY, __global f
 	set_bnd(3, velocZ, N);
 }
 
-__kernel void advect(const int b, __global float *d, __global float *d0,  __global float *velocX, __global float *velocY, __global float *velocZ, const float dt, const int N)
+__kernel void advect(const int b, __global float* d, __global float* d0,  __global float* velocX, __global float* velocY, __global float* velocZ, const float dt, const int N)
 {
 	const int i = get_global_id(0);
 	const int j = get_global_id(1);
