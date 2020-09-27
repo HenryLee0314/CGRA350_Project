@@ -56,7 +56,7 @@ public:
 
 	float length() const;
 
-	Vec3 unit() const;
+	Vec3 normalize() const;
 };
 
 inline Vec3 operator+(const Vec3 &u, const Vec3 &v) {
@@ -93,7 +93,7 @@ inline Vec3 cross(const Vec3 &u, const Vec3 &v) {
 	            u.x * v.y - u.y * v.x);
 }
 
-inline Vec3 unit(Vec3 v) {
+inline Vec3 normalize(Vec3 v) {
 	return v / v.length();
 }
 

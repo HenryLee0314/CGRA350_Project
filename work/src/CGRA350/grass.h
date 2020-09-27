@@ -26,6 +26,12 @@ private:
 
 	Vec3* _vertices;
 
+	Vec3 _G;
+	Vec3 _Ee[3];
+	Vec3 _Ew[3];
+	Vec3 _En[3];
+
+
 	uint32_t _VAO;
 	uint32_t _VBO;
 

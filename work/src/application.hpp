@@ -13,7 +13,6 @@
 #include "shader.h"
 #include "camera.h"
 #include "grass.h"
-#include "fluid_grid.h"
 
 
 // Basic model that holds the shader, mesh and transform for drawing.
@@ -62,10 +61,6 @@ private:
 	CGRA350::Shader _fluidShader;
 
 	CGRA350::Grass _grass;
-	bool _enable_grass;
-
-	CGRA350::FluidGrid _fluidGrid;
-	bool _enable_fluidGrid;
 
 public:
 	// setup

@@ -2,6 +2,7 @@
 #define GPU_FLUID_SIMULATION_H
 
 #include "opencl_task.h"
+#include "vector.h"
 
 namespace CGRA350 {
 
@@ -30,6 +31,22 @@ public:
 		return density;
 	}
 
+	float* getVx() {
+		return Vx;
+	}
+
+	float* getVy() {
+		return Vy;
+	}
+
+	float* getVz() {
+		return Vz;
+	}
+
+	Vec3 getVelocity(int index) {
+		return Vec3(Vx[index], Vy[index], Vz[index]);
+	}
+
 private:
 	int _size;
 	float _dt;
@@ -43,6 +60,10 @@ private:
 	int _iter;
 
 	float* density;
+
+	float* Vx;
+	float* Vy;
+	float* Vz;
 
 	cl_mem _cl_mem_s;
 	cl_mem _cl_mem_density;

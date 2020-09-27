@@ -18,6 +18,9 @@ set(sources
     "gpu_fluid_simulation.h"
     "gpu_fluid_simulation.cpp"
 
+    "scene.h"
+    "scene.cpp"
+
 	"CMakeLists.txt"
 )
 

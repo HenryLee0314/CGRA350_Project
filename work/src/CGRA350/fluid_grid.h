@@ -16,18 +16,35 @@ namespace CGRA350 {
 class FluidGrid
 {
 public:
-	FluidGrid();
-	~FluidGrid();
-
 	void addDensity(int x, int y, int z, float amount);
 
 	void addVelocity(int x, int y, int z, float amountX, float amountY, float amountZ);
+
+	Vec3 getVelocity(int index) {
+#ifdef __CPU_FLUID_SIMULATION__
+		return Vec3(0, 0, 0);
+#else // __GPU_FLUID_SIMULATION__
+		return _cube.getVelocity(index);
+#endif
+	}
 
 	void update();
 
 	void render();
 
 	void renderGUI();
+
+public:
+	static FluidGrid* getInstance();
+
+private:
+	FluidGrid();
+	virtual ~FluidGrid();
+	FluidGrid(const FluidGrid&);
+	FluidGrid& operator = (const FluidGrid&);
+
+private:
+	static FluidGrid* _instance;
 
 private:
 	int _size;
@@ -42,7 +59,7 @@ private:
 
 #ifdef __CPU_FLUID_SIMULATION__
 	CPU_FluidCube* _cube;
-#else
+#else // __GPU_FLUID_SIMULATION__
 	GPU_FluidCube _cube;
 #endif
 

@@ -46,6 +46,10 @@ GPU_FluidCube::GPU_FluidCube(const char* const fileAddress, int size, float diff
 	const int N = _size;
 	density = (float*)CGRA_CALLOC(N * N * N, sizeof(float), GPU_FLUID_SIM);
 
+	Vx = (float*)CGRA_CALLOC(N * N * N, sizeof(float), GPU_FLUID_SIM);
+	Vy = (float*)CGRA_CALLOC(N * N * N, sizeof(float), GPU_FLUID_SIM);
+	Vz = (float*)CGRA_CALLOC(N * N * N, sizeof(float), GPU_FLUID_SIM);
+
 	_cl_mem_s = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE, N * N * N * sizeof(float), NULL, NULL);
 	_cl_mem_density = clCreateBuffer(OpenclManager::getInstance()->getContent(), CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR , N * N * N * sizeof(float), (void*)density, NULL);
 
@@ -281,6 +285,11 @@ void GPU_FluidCube::GPU_FluidCubeStep()
 
 	// *Step 11: Read the cout put back to host memory.
 	clEnqueueReadBuffer(OpenclManager::getInstance()->getCommandQueue(), _cl_mem_density, CL_TRUE, 0, _size * _size * _size * sizeof(float), density, 0, NULL, NULL);
+
+	clEnqueueReadBuffer(OpenclManager::getInstance()->getCommandQueue(), _cl_mem_Vx, CL_TRUE, 0, _size * _size * _size * sizeof(float), Vx, 0, NULL, NULL);
+	clEnqueueReadBuffer(OpenclManager::getInstance()->getCommandQueue(), _cl_mem_Vy, CL_TRUE, 0, _size * _size * _size * sizeof(float), Vy, 0, NULL, NULL);
+	clEnqueueReadBuffer(OpenclManager::getInstance()->getCommandQueue(), _cl_mem_Vz, CL_TRUE, 0, _size * _size * _size * sizeof(float), Vz, 0, NULL, NULL);
+
 
 	CGRA_ACTIVITY_END(GPU_FLUID_SIM);
 }
