@@ -92,8 +92,8 @@ void FluidGrid::renderGUI()
 {
 	static float amount = 200;
 	static float vx = 10;
-	static float vy = 10;
-	static float vz = 10;
+	static float vy = 0;
+	static float vz = 0;
 
 #ifdef __CPU_FLUID_SIMULATION__
 	if (ImGui::Button("Reset")) CPU_FluidCubeReset(_cube);
@@ -117,8 +117,8 @@ void FluidGrid::renderGUI()
 	_cube.setViscosity(_viscosity);
 #endif
 
-	addDensity(_size / 2, _size / 2, _size / 2, amount);
-	addVelocity(_size / 2, _size / 2, _size / 2, vx, vy, vz);
+	addDensity(1, 1, _size / 2, amount);
+	addVelocity(1, 1, _size / 2, vx, vy, vz);
 }
 
 void FluidGrid::update()
@@ -138,7 +138,7 @@ void FluidGrid::update()
 				int N = _size;
 				int index = IX(i, j, k);
 				_vertices[(3 + 1 + 3) * index + 0] = (float(i) / (_size / 2) - 1) * 10;
-				_vertices[(3 + 1 + 3) * index + 1] = (float(j) / (_size / 2) - 1) * 10;
+				_vertices[(3 + 1 + 3) * index + 1] = (float(j) / (_size)) * 10;
 				_vertices[(3 + 1 + 3) * index + 2] = (float(k) / (_size / 2) - 1) * 10;
 
 #ifdef __CPU_FLUID_SIMULATION__

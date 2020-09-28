@@ -34,7 +34,7 @@ void set_bnd(int b, __global float* x, int N)
 	}
 
 	if (i == 0 && j == 0 && k == N - 1) {
-		x[IX(0    , 0    , N - 1, N)] = 0.33f * (x[IX(1    , 0    , N - 1, N)] + x[IX(0    , 1    , N - 1, N)] + x[IX(0    , 0    , N    , N)]);
+		x[IX(0    , 0    , N - 1, N)] = 0.33f * (x[IX(1    , 0    , N - 1, N)] + x[IX(0    , 1    , N - 1, N)] + x[IX(0    , 0    , N - 2, N)]);
 	}
 
 	if (i == 0 && j == N - 1 && k == N - 1) {
@@ -67,13 +67,14 @@ void lin_solve(int b, __global float* x, __global float* x0, float a, float c, i
 	float cRecip = 1.0 / c;
 	for (int m = 0; m < iter; m++) {
 		if (k > 0 && k < N - 1 && j > 0 && j < N - 1 && i > 0 && i < N - 1) {
-			x[IX(i, j, k, N)] = (x0[IX(i, j, k, N)] + a * (x[IX(i + 1, j    , k    , N)]
-			                     + x[IX(i - 1, j    , k    , N)]
-			                     + x[IX(i    , j + 1, k    , N)]
-			                     + x[IX(i    , j - 1, k    , N)]
-			                     + x[IX(i    , j    , k + 1, N)]
-			                     + x[IX(i    , j    , k - 1, N)]
-			                                              )) * cRecip;
+			x[IX(i, j, k, N)] = (x0[IX(i, j, k, N)] + a * (
+			                         x[IX(i + 1, j    , k    , N)]
+			                         + x[IX(i - 1, j    , k    , N)]
+			                         + x[IX(i    , j + 1, k    , N)]
+			                         + x[IX(i    , j - 1, k    , N)]
+			                         + x[IX(i    , j    , k + 1, N)]
+			                         + x[IX(i    , j    , k - 1, N)]
+			                     )) * cRecip;
 		}
 		set_bnd(b, x, N);
 	}

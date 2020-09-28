@@ -23,7 +23,7 @@ GPU_FluidCube::GPU_FluidCube(const char* const fileAddress, int size, float diff
 	, _bnd_1(1)
 	, _bnd_2(2)
 	, _bnd_3(3)
-	, _iter(4)
+	, _iter(1)
 {
 	/**Step 7: Create kernel object */
 	k_diffuse_0 = clCreateKernel(program, "diffuse", NULL);

@@ -2,8 +2,9 @@
 #define FLUID_GRID_H
 
 #include <cstdint>
+#include "vector.h"
 
-// #define __CPU_FLUID_SIMULATION__
+//#define __CPU_FLUID_SIMULATION__
 
 #ifdef __CPU_FLUID_SIMULATION__
 #include "cpu_fluid_simulation.h"
@@ -22,9 +23,9 @@ public:
 
 	Vec3 getVelocity(int index) {
 #ifdef __CPU_FLUID_SIMULATION__
-		return Vec3(0, 0, 0);
+		return Vec3(_cube->Vx[index], _cube->Vy[index], _cube->Vz[index]) * _cube->density[index];
 #else // __GPU_FLUID_SIMULATION__
-		return _cube.getVelocity(index);
+		return _cube.getVelocity(index) * _cube.getDensity()[index];
 #endif
 	}
 

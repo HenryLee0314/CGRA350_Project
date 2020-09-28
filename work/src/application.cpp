@@ -45,6 +45,7 @@ Application::Application(GLFWwindow *window)
 	, _camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f))
 	, _grassShader(CGRA_SRCDIR "/res/shaders/vertexShader/grass.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/grass.fs", CGRA_SRCDIR "/res/shaders/geometryShader/grass.gs", CGRA_SRCDIR "/res/shaders/tessellationControlShader/grass.tcs", CGRA_SRCDIR "/res/shaders/tessellationEvaluationShader/grass.tes")
 	, _fluidShader(CGRA_SRCDIR "/res/shaders/vertexShader/fluid.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/fluid.fs")
+	, _grass(Vec3(0, 0, 0), Vec3(2, 2.5, 3), Vec3(3, 3, 3), Vec3(4, 0, 4))
 {
 
 	m_lightPosition = glm::vec3(3.0f, 3.0f, 3.0f);
