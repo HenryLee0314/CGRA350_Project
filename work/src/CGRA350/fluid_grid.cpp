@@ -38,6 +38,9 @@ FluidGrid::FluidGrid()
 #else // __GPU_FLUID_SIMULATION__
 	, _cube(CGRA_SRCDIR "/res/openCL/fluid_simulation.cl", _size, _diffusion, _viscosity, _dt)
 #endif
+	, _position()
+	, _direction()
+	, _velocity_coefficient(10)
 {
 
 #ifdef __CPU_FLUID_SIMULATION__
@@ -70,8 +73,29 @@ FluidGrid::~FluidGrid()
 	}
 }
 
+int FluidGrid::getIndexFromPosition(float x, float y, float z)
+{
+	int N = _size;
+	float a = (x / _FIELD_RADIUS_ + 1) * (N / 2);
+	float b = (y / _FIELD_RADIUS_) * (N);
+	float c = (z / _FIELD_RADIUS_ + 1) * (N / 2);
+
+	return IX((int)a, (int)b, (int)c);
+}
+
+Vec3 FluidGrid::getVec3IndexFromPosition(float x, float y, float z)
+{
+	int N = _size;
+	float a = (x / _FIELD_RADIUS_ + 1) * (N / 2);
+	float b = (y / _FIELD_RADIUS_) * (N);
+	float c = (z / _FIELD_RADIUS_ + 1) * (N / 2);
+
+	return Vec3(a, b, c);
+}
+
 void FluidGrid::addDensity(int x, int y, int z, float amount)
 {
+	// CGRA_LOGD("%d %d %d", x, y, z);
 #ifdef __CPU_FLUID_SIMULATION__
 	CPU_FluidCubeAddDensity(_cube,  x,  y,  z,  amount);
 #else // __GPU_FLUID_SIMULATION__
@@ -81,6 +105,7 @@ void FluidGrid::addDensity(int x, int y, int z, float amount)
 
 void FluidGrid::addVelocity(int x, int y, int z, float amountX, float amountY, float amountZ)
 {
+	// CGRA_LOGD("%d %d %d %f %f %f", x, y, z, amountX, amountY, amountZ);
 #ifdef __CPU_FLUID_SIMULATION__
 	CPU_FluidCubeAddVelocity(_cube,  x,  y,  z,  amountX,  amountY,  amountZ);
 #else // __GPU_FLUID_SIMULATION__
@@ -91,9 +116,7 @@ void FluidGrid::addVelocity(int x, int y, int z, float amountX, float amountY, f
 void FluidGrid::renderGUI()
 {
 	static float amount = 200;
-	static float vx = 10;
-	static float vy = 0;
-	static float vz = 0;
+	static float angle = 0;
 
 #ifdef __CPU_FLUID_SIMULATION__
 	if (ImGui::Button("Reset")) CPU_FluidCubeReset(_cube);
@@ -103,11 +126,25 @@ void FluidGrid::renderGUI()
 
 	ImGui::SliderFloat("Diffusion", &_diffusion, 0.000f, 1.0f);
 	ImGui::SliderFloat("Viscosity", &_viscosity, 0.001f, 1.0f);
+
 	ImGui::SliderFloat("Amount", &amount, 0.0f, 500.0f);
 
-	ImGui::SliderFloat("Velocity X", &vx, -50.0f, 50.0f);
-	ImGui::SliderFloat("Velocity Y", &vy, -50.0f, 50.0f);
-	ImGui::SliderFloat("Velocity Z", &vz, -50.0f, 50.0f);
+	ImGui::SliderFloat("angle", &angle, 0.0f, 2 * 3.1415926535897932);
+	_position = Vec3((_FIELD_RADIUS_ - 0.5) * cos(angle), 0.5, (_FIELD_RADIUS_ - 0.5) * sin(angle));
+	// CGRA_LOGD("_position %f %f %f", _position.x, _position.y, _position.z);
+	Vec3 position = getVec3IndexFromPosition(_position.x, _position.y, _position.z);
+	// CGRA_LOGD("position %d %d %d", (int)position.x, (int)position.y, (int)position.z);
+
+
+	_direction = Vec3(0, 0, 0) - _position;
+	_direction = _direction.normalize();
+	// CGRA_LOGD("_direction %f %f %f", _direction.x, _direction.y, _direction.z);
+
+
+	ImGui::SliderFloat("_velocity_coefficient", &_velocity_coefficient, 0, 50.0f);
+
+	addDensity((int)position.x, (int)position.y, (int)position.z, amount);
+	addVelocity((int)position.x, (int)position.y, (int)position.z,  _direction.x * _velocity_coefficient, _direction.y * _velocity_coefficient, _direction.z * _velocity_coefficient);
 
 #ifdef __CPU_FLUID_SIMULATION__
 	_cube->diff = _diffusion;
@@ -117,8 +154,7 @@ void FluidGrid::renderGUI()
 	_cube.setViscosity(_viscosity);
 #endif
 
-	addDensity(1, 1, _size / 2, amount);
-	addVelocity(1, 1, _size / 2, vx, vy, vz);
+
 }
 
 void FluidGrid::update()
@@ -137,9 +173,9 @@ void FluidGrid::update()
 			for (int k = 0; k < _size; ++k) {
 				int N = _size;
 				int index = IX(i, j, k);
-				_vertices[(3 + 1 + 3) * index + 0] = (float(i) / (_size / 2) - 1) * 10;
-				_vertices[(3 + 1 + 3) * index + 1] = (float(j) / (_size)) * 10;
-				_vertices[(3 + 1 + 3) * index + 2] = (float(k) / (_size / 2) - 1) * 10;
+				_vertices[(3 + 1 + 3) * index + 0] = (float(i) / (_size / 2) - 1) * _FIELD_RADIUS_;
+				_vertices[(3 + 1 + 3) * index + 1] = (float(j) / (_size)) * _FIELD_RADIUS_;
+				_vertices[(3 + 1 + 3) * index + 2] = (float(k) / (_size / 2) - 1) * _FIELD_RADIUS_;
 
 #ifdef __CPU_FLUID_SIMULATION__
 				_vertices[(3 + 1 + 3) * index + 3] = _cube->density[index];

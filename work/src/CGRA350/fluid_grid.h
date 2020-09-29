@@ -35,6 +35,10 @@ public:
 
 	void renderGUI();
 
+	int getIndexFromPosition(float x, float y, float z);
+
+	Vec3 getVec3IndexFromPosition(float x, float y, float z);
+
 public:
 	static FluidGrid* getInstance();
 
@@ -48,6 +52,7 @@ private:
 	static FluidGrid* _instance;
 
 private:
+	const static unsigned int _FIELD_RADIUS_ = 10;
 	int _size;
 	float _diffusion;
 	float _viscosity;
@@ -63,6 +68,10 @@ private:
 #else // __GPU_FLUID_SIMULATION__
 	GPU_FluidCube _cube;
 #endif
+
+	Vec3 _position;
+	Vec3 _direction;
+	float _velocity_coefficient;
 
 };
 

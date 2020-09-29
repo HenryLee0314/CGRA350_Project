@@ -13,8 +13,6 @@
 
 #include "fluid_grid.h"
 
-#define IX(x, y, z) ((x) + (y) * N + (z) * N * N)
-
 namespace CGRA350 {
 
 float Grass::_sigma = 10000;
@@ -77,16 +75,11 @@ void Grass::renderGUI()
 	_En[1] = cross(_Ee[1], _Ew[1]).normalize();
 	_En[2] = cross(_Ee[2], _Ew[2]).normalize();
 
-	int N = 50;
-
 	for (size_t i = 0; i < VERTICES_SIZE; ++i) {
 		CGRA_LOGD("%zu %f %f %f", i, _vertices[i].x, _vertices[i].y, _vertices[i].z);
-		float a = (_vertices[i].x / 10 + 1) * (N / 2);
-		float b = (_vertices[i].y / 10) * (N);
-		float c = (_vertices[i].z / 10 + 1) * (N / 2);
+		_index[i] = FluidGrid::getInstance()->getIndexFromPosition(_vertices[i].x, _vertices[i].y, _vertices[i].z);
+		CGRA_LOGD("_index[i] %d", _index[i]);
 
-		_index[i] = IX((int)a, (int)b, (int)c);
-		CGRA_LOGD("x %d y %d z %d _index[i] %d", (int)a, (int)b, (int)c, _index[i]);
 		_velocity[i] = FluidGrid::getInstance()->getVelocity(_index[i]);
 	}
 
@@ -126,7 +119,7 @@ void Grass::renderGUI()
 			_Rs[i] = Vec3(0, 0, 0);
 		}
 		else {
-			_Rs[i] = _k_tip * _delta_theta_s * deltaG;
+			_Rs[i] = _k_tip * _delta_theta_s * deltaG.normalize();
 		}
 		CGRA_LOGD("_Rs %d %f %f %f", i, _Rs[i].x , _Rs[i].y, _Rs[i].z);
 	}
@@ -188,18 +181,21 @@ void Grass::renderGUI()
 	F = F / 3;
 	CGRA_LOGD("F %f %f %f", F.x, F.y, F.z);
 
-	if (F.length() > 0.0001) {
-		Vec3 testN = cross(F, Vec3(0, 1, 0));
-		CGRA_LOGD("testN %f %f %f", testN.x , testN.y, testN.z);
+	if (F.length() > 0) {
+		Vec3 N = cross(Vec3(0, 1, 0), F);
+		CGRA_LOGD("N %f %f %f", N.x , N.y, N.z);
 
-		Vec3 w = testN / (mass * total_length * total_length);
+		Vec3 w = N / (mass * total_length * total_length);
 		CGRA_LOGD("w %f %f %f", w.x , w.y, w.z);
 
 		float angle = atan(w.z / w.x) * _angle_coefficient;
 		CGRA_LOGD("angle %f", angle);
 
+
 		glm::mat4 rotation = glm::mat4(1.0);
 		rotation = glm::rotate(rotation, angle, glm::vec3(0, 1, 0));
+
+
 
 		glm::vec4 temp[4];
 		for (int i = 0; i < 4; ++i) {
