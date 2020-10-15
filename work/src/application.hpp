@@ -15,6 +15,7 @@
 #include "grass.h"
 #include "fluid_grid.h"
 
+#include "PTC/particles.hpp"
 
 // Basic model that holds the shader, mesh and transform for drawing.
 // Can be copied and modified for adding in extra information for drawing
@@ -67,6 +68,8 @@ private:
 	CGRA350::FluidGrid _fluidGrid;
 	bool _enable_fluidGrid;
 
+	PTC::Particles _particles;
+	bool _enable_particles;
 public:
 	// setup
 	Application(GLFWwindow *);

@@ -20,12 +20,13 @@
 #include "opencl_manager.h"
 #include "opencl_task.h"
 
+#define MAXPARTICLES 100000
 
 using namespace std;
 using namespace cgra;
 using namespace glm;
 using namespace CGRA350;
-
+using namespace PTC;
 
 // void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
 // 	mat4 modelview = view * modelTransform;
@@ -47,6 +48,8 @@ Application::Application(GLFWwindow *window)
 	, _fluidGrid()
 	, _enable_grass(true)
 	, _enable_fluidGrid(false)
+	,_particles(Particles(MAXPARTICLES))
+	, _enable_particles(false)
 {
 
 	m_lightPosition = glm::vec3(3.0f, 3.0f, 3.0f);
@@ -100,10 +103,9 @@ void Application::render() {
 	(m_showWireframe) ? glEnable(GL_PROGRAM_POINT_SIZE) : glDisable(GL_PROGRAM_POINT_SIZE);
 
 
-
 	// draw the model
 	//m_model.draw(view, proj);
-
+	
 	if (_enable_grass) {
 		_grassShader.use();
 		_grassShader.setMat4("model", model);
@@ -136,6 +138,9 @@ void Application::render() {
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);
 	}
+	if (_enable_particles) {
+		_particles.draw(view, proj, m_distance);
+	}
 }
 
 
@@ -164,12 +169,13 @@ void Application::renderGUI() {
 		_enable_grass = true;
 		_enable_fluidGrid = false;
 	}
-
 	if (ImGui::Button("Fluid Grid")) {
 		_enable_grass = false;
 		_enable_fluidGrid = true;
 	}
-
+	if (ImGui::Button("Particles")) {
+		_enable_particles = true;
+	}
 
 	ImGui::Separator();
 

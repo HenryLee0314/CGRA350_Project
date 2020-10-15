@@ -77,6 +77,7 @@ include_directories("${PROJECT_SOURCE_DIR}/src") # Add source to include directo
 
 include_directories("${PROJECT_SOURCE_DIR}/src/CGRA350")
 include_directories("${PROJECT_SOURCE_DIR}/src/YHL_base")
+include_directories("${PROJECT_SOURCE_DIR}/src/PTC")
 add_definitions(-DHEAP_CALCULATOR)
 add_definitions(-DTIME_CALCULATOR)
 
