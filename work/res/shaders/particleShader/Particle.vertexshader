@@ -19,11 +19,11 @@ uniform mat4 VP; // Model-View-Projection matrix, but without the Model (the pos
 void main()
 {
 	float particleSize = xyzs.w; // because we encoded it this way.
-	vec3 particleCenter_wordspace = xyzs.xyz;
+	vec3 particleCenter_worldspace = xyzs.xyz;
 	
 	
 	vec3 vertexPosition_worldspace = 
-		particleCenter_wordspace
+		particleCenter_worldspace
 		+ CameraRight_worldspace * squareVertices.x * particleSize
 		+ CameraUp_worldspace * squareVertices.y * particleSize;
 	

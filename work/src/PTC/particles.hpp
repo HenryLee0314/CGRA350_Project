@@ -33,8 +33,12 @@ namespace PTC {
 		int m_lastUsedParticle = 0;
 		int m_particleSize = 0;
 		glm::mat4 modelTransform{ 1.0 };
+		glm::vec3 m_mainPosition;
+		glm::vec3 m_mainDir;
+		bool m_isColor = false;
+		int m_amount_per_milisecond = 10000;
 		GLuint VAO;
-		GLuint billboard_vertex_buffer;
+		GLuint base_vertex_buffer;
 		GLuint particles_position_buffer;
 		GLuint particles_color_buffer;
 		GLuint Texture;
@@ -47,7 +51,9 @@ namespace PTC {
 		Particles(int particleSize);
 		int FindUnusedParticle();
 		void SortParticles();
-		void draw(const glm::mat4& view, const glm::mat4 proj, float m_distance);
+		void draw(const glm::mat4& view, const glm::mat4 proj, float m_distance, int particles_per_millisecond);
+		void setColor(bool useColor);
+		void set_amout_per_milisecond(int amount_per_milisecond);
 	};
 
 

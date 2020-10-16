@@ -52,6 +52,7 @@ private:
 	bool m_show_axis = false;
 	bool m_show_grid = false;
 	bool m_showWireframe = false;
+	bool m_colorSand = false;
 
 	glm::vec3 m_lightPosition;
 
@@ -70,6 +71,7 @@ private:
 
 	PTC::Particles _particles;
 	bool _enable_particles;
+	int m_per_millisecond = 10;
 public:
 	// setup
 	Application(GLFWwindow *);

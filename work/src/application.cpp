@@ -84,9 +84,9 @@ void Application::render() {
 	mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
 
 	// view matrix
-	// mat4 view = translate(mat4(1), vec3(0, 0, -m_distance))
-	//             * rotate(mat4(1), m_pitch, vec3(1, 0, 0))
-	//             * rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
+	 mat4 view2 = translate(mat4(1), vec3(0, 0, -m_distance))
+	             * rotate(mat4(1), m_pitch, vec3(1, 0, 0))
+	             * rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
 
 	_camera.setYaw(m_yaw);
 	_camera.setPitch(m_pitch);
@@ -139,7 +139,9 @@ void Application::render() {
 		glDisable(GL_BLEND);
 	}
 	if (_enable_particles) {
-		_particles.draw(view, proj, m_distance);
+		_particles.setColor(m_colorSand);
+		_particles.draw(view2, proj, m_distance, m_per_millisecond);
+		
 	}
 }
 
@@ -174,9 +176,12 @@ void Application::renderGUI() {
 		_enable_fluidGrid = true;
 	}
 	if (ImGui::Button("Particles")) {
-		_enable_particles = true;
+		_enable_particles = !_enable_particles;
 	}
-
+	ImGui::SameLine();
+	ImGui::Checkbox("colorSand", &m_colorSand);
+	ImGui::SameLine();
+	ImGui::SliderInt("# per millisecond,", &m_per_millisecond, 10000, 100000, "%.0f");
 	ImGui::Separator();
 
 	// example of how to use input boxes
