@@ -62,6 +62,7 @@ void Grass::renderGUI()
 	ImGui::SliderFloat("angle coefficient [_angle_coefficient]", &_angle_coefficient, 0, 1);
 
 	_G_current = _vertices[3] - _vertices[0];
+	_G_current = Vec3(_G_current.x, 0, _G_current.z);
 
 	_Ee[0] = (_vertices[1] - _vertices[0]).normalize();
 	_Ee[1] = (_vertices[2] - _vertices[1]).normalize();
@@ -78,9 +79,10 @@ void Grass::renderGUI()
 	for (size_t i = 0; i < VERTICES_SIZE; ++i) {
 		CGRA_LOGD("%zu %f %f %f", i, _vertices[i].x, _vertices[i].y, _vertices[i].z);
 		_index[i] = FluidGrid::getInstance()->getIndexFromPosition(_vertices[i].x, _vertices[i].y, _vertices[i].z);
-		CGRA_LOGD("_index[i] %d", _index[i]);
+		CGRA_LOGD("index[i] %d", _index[i]);
 
 		_velocity[i] = FluidGrid::getInstance()->getVelocity(_index[i]);
+		CGRA_LOGD("velocity[i] %f %f %f", _velocity[i].x, _velocity[i].y, _velocity[i].z);
 	}
 
 
@@ -90,14 +92,12 @@ void Grass::renderGUI()
 
 
 	for (size_t i = 0; i < VERTICES_SIZE - 1; ++i) {
-		_Ws[i] = _sigma * dot(_velocity[i], _Ew[i]) * _Ew[i];
+		_Ws[i] = _sigma * dot(_velocity[i + 1], _Ew[i]) * _Ew[i];
 		CGRA_LOGD("_Ws %d %f %f %f", i, _Ws[i].x , _Ws[i].y, _Ws[i].z);
 	}
 
 
 
-
-	_G_current = Vec3(_G_current.x, 0, _G_current.z);
 	float dotResult = dot(_G_static.normalize(), _G_current.normalize());
 	CGRA_LOGD("dot result: %f", dotResult);
 	if (dotResult <= -1) {
@@ -173,35 +173,63 @@ void Grass::renderGUI()
 	length[2] = (_vertices[3] - _vertices[2]).length();
 	float total_length = length[0] + length[1] + length[2];
 
+	Vec3 N[3];
+	float I[3];
+
+	Vec3 w[3];
+
+	float angle[3];
+	glm::mat4 rotation[3] = {glm::mat4(1.0), glm::mat4(1.0), glm::mat4(1.0)};
+
 	for (size_t i = 0; i < VERTICES_SIZE - 1; ++i) {
-		_F[i] = _Ws[i] + _Rs[i] + _Wb[i] + _Rb[i];
+		I[i] = mass * length[i] * length[i];
+		_F[i] = _Ws[i] + _Rs[i];// + _Wb[i] + _Rb[i];
+
+		// Vec3 dir = cross(Vec3(0, 1, 0), _Ee[i]).normalize();
+		// if (dot(_F[i], dir) < 0) {
+		// 	dir = -dir;
+		// }
+		// dir = _F[i].length() * dir * dot(_F[i], dir);
+		// angle[i] = atan(dir.z / (dir.x != 0 ? dir.x : 0.000001)) * _angle_coefficient;
+
+
+		N[i] = cross(_Ee[i], _F[i]);
+		w[i] = N[i] / I[i];
+		CGRA_LOGD("w[i] %f %f %f", w[i].x, w[i].y, w[i].z);
+		angle[i] = atan(w[i].z / (w[i].x != 0 ? w[i].x : 0.000001)) * _angle_coefficient;
+
+		CGRA_LOGD("angle %f", angle[i]);
+		rotation[i] = glm::rotate(rotation[i], angle[i], glm::vec3(0, 1, 0));
 	}
 
-	Vec3 F = _F[0] + _F[1] + _F[2];
-	F = F / 3;
-	CGRA_LOGD("F %f %f %f", F.x, F.y, F.z);
+	// Vec3 F = _F[0] + _F[1] + _F[2];
+	// F = F / 3;
+	// CGRA_LOGD("F %f %f %f", F.x, F.y, F.z);
+	Vec3 W = w[0] + w[1] + w[2];
+	W = W / 3;
 
-	if (F.length() > 0) {
-		Vec3 N = cross(Vec3(0, 1, 0), F);
-		CGRA_LOGD("N %f %f %f", N.x , N.y, N.z);
+	if (W.length() > 0) {
+		// Vec3 N = cross(Vec3(0, 1, 0), F);
+		// CGRA_LOGD("N %f %f %f", N.x , N.y, N.z);
 
-		Vec3 w = N / (mass * total_length * total_length);
-		CGRA_LOGD("w %f %f %f", w.x , w.y, w.z);
+		// Vec3 w = N / (mass * total_length * total_length);
+		// CGRA_LOGD("w %f %f %f", w.x , w.y, w.z);
 
-		float angle = atan(w.z / w.x) * _angle_coefficient;
-		CGRA_LOGD("angle %f", angle);
+		// float angle = atan(W.z / W.x) * _angle_coefficient;
+		// CGRA_LOGD("angle %f", angle);
 
 
-		glm::mat4 rotation = glm::mat4(1.0);
-		rotation = glm::rotate(rotation, angle, glm::vec3(0, 1, 0));
+		// glm::mat4 rotation = glm::mat4(1.0);
+		// rotation = glm::rotate(rotation, angle, glm::vec3(0, 1, 0));
 
 
 
 		glm::vec4 temp[4];
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 1; i < 4; ++i) {
 			temp[i] = glm::vec4(_vertices[i].x, _vertices[i].y, _vertices[i].z, 1);
-			temp[i] = rotation * temp[i];
+			temp[i] = rotation[i - 1] * temp[i];
 			_vertices[i] = Vec3(temp[i].x, temp[i].y, temp[i].z);
+			CGRA_LOGD("after update: vertices %f %f %f", _vertices[i].x, _vertices[i].y, _vertices[i].z);
 		}
 	}
 

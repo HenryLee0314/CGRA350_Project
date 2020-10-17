@@ -28,7 +28,7 @@ FluidGrid* FluidGrid::getInstance()
 FluidGrid::FluidGrid()
 	: _size(50)
 	, _diffusion(0.0)
-	, _viscosity(0.001)
+	, _viscosity(0.0)
 	, _dt(1)
 	, _vertices(nullptr)
 	, _VAO(0)
@@ -40,7 +40,7 @@ FluidGrid::FluidGrid()
 #endif
 	, _position()
 	, _direction()
-	, _velocity_coefficient(10)
+	, _velocity_coefficient(50)
 {
 
 #ifdef __CPU_FLUID_SIMULATION__
@@ -115,8 +115,10 @@ void FluidGrid::addVelocity(int x, int y, int z, float amountX, float amountY, f
 
 void FluidGrid::renderGUI()
 {
-	static float amount = 200;
+	static float amount = 500;
 	static float angle = 0;
+
+	static float Y = 0.5;
 
 #ifdef __CPU_FLUID_SIMULATION__
 	if (ImGui::Button("Reset")) CPU_FluidCubeReset(_cube);
@@ -124,24 +126,26 @@ void FluidGrid::renderGUI()
 	if (ImGui::Button("Reset")) _cube.GPU_FluidCubeReset();
 #endif
 
-	ImGui::SliderFloat("Diffusion", &_diffusion, 0.000f, 1.0f);
-	ImGui::SliderFloat("Viscosity", &_viscosity, 0.001f, 1.0f);
+	ImGui::SliderFloat("Diffusion", &_diffusion, 0.000f, 0.1f);
+	ImGui::SliderFloat("Viscosity", &_viscosity, 0.000f, 0.1f);
 
 	ImGui::SliderFloat("Amount", &amount, 0.0f, 500.0f);
 
 	ImGui::SliderFloat("angle", &angle, 0.0f, 2 * 3.1415926535897932);
-	_position = Vec3((_FIELD_RADIUS_ - 0.5) * cos(angle), 0.5, (_FIELD_RADIUS_ - 0.5) * sin(angle));
-	// CGRA_LOGD("_position %f %f %f", _position.x, _position.y, _position.z);
+	ImGui::SliderFloat("Y", &Y, 0.5, _FIELD_RADIUS_ - 0.5);
+	
+	_position = Vec3((_FIELD_RADIUS_ - 0.5) * cos(angle), Y, (_FIELD_RADIUS_ - 0.5) * sin(angle));
+	CGRA_LOGD("_position %f %f %f", _position.x, _position.y, _position.z);
 	Vec3 position = getVec3IndexFromPosition(_position.x, _position.y, _position.z);
-	// CGRA_LOGD("position %d %d %d", (int)position.x, (int)position.y, (int)position.z);
+	CGRA_LOGD("position %d %d %d", (int)position.x, (int)position.y, (int)position.z);
 
 
-	_direction = Vec3(0, 0, 0) - _position;
+	_direction = Vec3(0, Y, 0) - _position;
 	_direction = _direction.normalize();
-	// CGRA_LOGD("_direction %f %f %f", _direction.x, _direction.y, _direction.z);
+	CGRA_LOGD("_direction %f %f %f", _direction.x, _direction.y, _direction.z);
 
 
-	ImGui::SliderFloat("_velocity_coefficient", &_velocity_coefficient, 0, 50.0f);
+	ImGui::SliderFloat("Velocity Coefficient", &_velocity_coefficient, 0, 50.0f);
 
 	addDensity((int)position.x, (int)position.y, (int)position.z, amount);
 	addVelocity((int)position.x, (int)position.y, (int)position.z,  _direction.x * _velocity_coefficient, _direction.y * _velocity_coefficient, _direction.z * _velocity_coefficient);

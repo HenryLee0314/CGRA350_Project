@@ -10,52 +10,52 @@ void set_bnd(int b, __global float* x, int N)
 	const int k = get_global_id(2);
 
 	if (j > 0 && j < N - 1 && i > 0 && i < N - 1) {
-		x[IX(i, j, 0    , N)] = b == 3 ? -x[IX(i, j, 1    , N)] : x[IX(i, j, 1    , N)];
-		x[IX(i, j, N - 1, N)] = b == 3 ? -x[IX(i, j, N - 2, N)] : x[IX(i, j, N - 2, N)];
+		// x[IX(i, j, 0    , N)] = b == 3 ? -x[IX(i, j, 1    , N)] : x[IX(i, j, 1    , N)];
+		// x[IX(i, j, N - 1, N)] = b == 3 ? -x[IX(i, j, N - 2, N)] : x[IX(i, j, N - 2, N)];
 	}
 
 	if (k > 0 && k < N - 1 && i > 0 && i < N - 1) {
 		x[IX(i, 0    , k, N)] = b == 2 ? -x[IX(i, 1    , k, N)] : x[IX(i, 1    , k, N)];
-		x[IX(i, N - 1, k, N)] = b == 2 ? -x[IX(i, N - 2, k, N)] : x[IX(i, N - 2, k, N)];
+		//x[IX(i, N - 1, k, N)] = b == 2 ? -x[IX(i, N - 2, k, N)] : x[IX(i, N - 2, k, N)];
 	}
 
 
 	if (k > 0 && k < N - 1 && j > 0 && j < N - 1) {
-		x[IX(0    , j, k, N)] = b == 1 ? -x[IX(1    , j, k, N)] : x[IX(1    , j, k, N)];
-		x[IX(N - 1, j, k, N)] = b == 1 ? -x[IX(N - 2, j, k, N)] : x[IX(N - 2, j, k, N)];
+		// x[IX(0    , j, k, N)] = b == 1 ? -x[IX(1    , j, k, N)] : x[IX(1    , j, k, N)];
+		// x[IX(N - 1, j, k, N)] = b == 1 ? -x[IX(N - 2, j, k, N)] : x[IX(N - 2, j, k, N)];
 	}
 
-	if (i == 0 && j == 0 && k == 0) {
-		x[IX(0    , 0    , 0    , N)] = 0.33f * (x[IX(1    , 0    , 0    , N)] + x[IX(0    , 1    , 0    , N)] + x[IX(0    , 0    , 1    , N)]);
-	}
+	// if (i == 0 && j == 0 && k == 0) {
+	// 	x[IX(0    , 0    , 0    , N)] = 0.33f * (x[IX(1    , 0    , 0    , N)] + x[IX(0    , 1    , 0    , N)] + x[IX(0    , 0    , 1    , N)]);
+	// }
 
-	if (i == 0 && j == N - 1 && k == 0) {
-		x[IX(0    , N - 1, 0    , N)] = 0.33f * (x[IX(1    , N - 1, 0    , N)] + x[IX(0    , N - 2, 0    , N)] + x[IX(0    , N - 1, 1    , N)]);
-	}
+	// if (i == 0 && j == N - 1 && k == 0) {
+	// 	x[IX(0    , N - 1, 0    , N)] = 0.33f * (x[IX(1    , N - 1, 0    , N)] + x[IX(0    , N - 2, 0    , N)] + x[IX(0    , N - 1, 1    , N)]);
+	// }
 
-	if (i == 0 && j == 0 && k == N - 1) {
-		x[IX(0    , 0    , N - 1, N)] = 0.33f * (x[IX(1    , 0    , N - 1, N)] + x[IX(0    , 1    , N - 1, N)] + x[IX(0    , 0    , N - 2, N)]);
-	}
+	// if (i == 0 && j == 0 && k == N - 1) {
+	// 	x[IX(0    , 0    , N - 1, N)] = 0.33f * (x[IX(1    , 0    , N - 1, N)] + x[IX(0    , 1    , N - 1, N)] + x[IX(0    , 0    , N - 2, N)]);
+	// }
 
-	if (i == 0 && j == N - 1 && k == N - 1) {
-		x[IX(0    , N - 1, N - 1, N)] = 0.33f * (x[IX(1    , N - 1, N - 1, N)] + x[IX(0    , N - 2, N - 1, N)] + x[IX(0    , N - 1, N - 2, N)]);
-	}
+	// if (i == 0 && j == N - 1 && k == N - 1) {
+	// 	x[IX(0    , N - 1, N - 1, N)] = 0.33f * (x[IX(1    , N - 1, N - 1, N)] + x[IX(0    , N - 2, N - 1, N)] + x[IX(0    , N - 1, N - 2, N)]);
+	// }
 
-	if (i == N - 1 && j == 0 && k == 0) {
-		x[IX(N - 1, 0    , 0    , N)] = 0.33f * (x[IX(N - 2, 0    , 0    , N)] + x[IX(N - 1, 1    , 0    , N)] + x[IX(N - 1, 0    , 1    , N)]);
-	}
+	// if (i == N - 1 && j == 0 && k == 0) {
+	// 	x[IX(N - 1, 0    , 0    , N)] = 0.33f * (x[IX(N - 2, 0    , 0    , N)] + x[IX(N - 1, 1    , 0    , N)] + x[IX(N - 1, 0    , 1    , N)]);
+	// }
 
-	if (i == N - 1 && j == N - 1 && k == 0) {
-		x[IX(N - 1, N - 1, 0    , N)] = 0.33f * (x[IX(N - 2, N - 1, 0    , N)] + x[IX(N - 1, N - 2, 0    , N)] + x[IX(N - 1, N - 1, 1    , N)]);
-	}
+	// if (i == N - 1 && j == N - 1 && k == 0) {
+	// 	x[IX(N - 1, N - 1, 0    , N)] = 0.33f * (x[IX(N - 2, N - 1, 0    , N)] + x[IX(N - 1, N - 2, 0    , N)] + x[IX(N - 1, N - 1, 1    , N)]);
+	// }
 
-	if (i == N - 1 && j == 0 && k == N - 1) {
-		x[IX(N - 1, 0    , N - 1, N)] = 0.33f * (x[IX(N - 2, 0    , N - 1, N)] + x[IX(N - 1, 1    , N - 1, N)] + x[IX(N - 1, 0    , N - 2, N)]);
-	}
+	// if (i == N - 1 && j == 0 && k == N - 1) {
+	// 	x[IX(N - 1, 0    , N - 1, N)] = 0.33f * (x[IX(N - 2, 0    , N - 1, N)] + x[IX(N - 1, 1    , N - 1, N)] + x[IX(N - 1, 0    , N - 2, N)]);
+	// }
 
-	if (i == N - 1 && j == N - 1 && k == N - 1) {
-		x[IX(N - 1, N - 1, N - 1, N)] = 0.33f * (x[IX(N - 2, N - 1, N - 1, N)] + x[IX(N - 1, N - 2, N - 1, N)] + x[IX(N - 1, N - 1, N - 2, N)]);
-	}
+	// if (i == N - 1 && j == N - 1 && k == N - 1) {
+	// 	x[IX(N - 1, N - 1, N - 1, N)] = 0.33f * (x[IX(N - 2, N - 1, N - 1, N)] + x[IX(N - 1, N - 2, N - 1, N)] + x[IX(N - 1, N - 1, N - 2, N)]);
+	// }
 }
 
 void lin_solve(int b, __global float* x, __global float* x0, float a, float c, int iter, int N)
