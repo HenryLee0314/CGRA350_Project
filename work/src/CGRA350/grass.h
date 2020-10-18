@@ -4,13 +4,14 @@
 #include <cstdint>
 
 #include "vector.h"
+#include "object.h"
 
 namespace CGRA350 {
 
-class Grass
+class Grass : public Object
 {
 public:
-	Grass(Vec3 a, Vec3 b, Vec3 c, Vec3 d);
+	Grass(Vec3 a, Vec3 b, Vec3 c, Vec3 d, Object* parent = nullptr);
 
 	~Grass();
 
@@ -25,8 +26,6 @@ private:
 	const static size_t VERTICES_SIZE = 4;
 
 	float _static_angle;
-
-	bool _hasChanged;
 
 	Vec3* _vertices;
 

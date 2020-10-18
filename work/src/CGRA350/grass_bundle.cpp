@@ -13,20 +13,15 @@ GrassBundle* GrassBundle::getInstance()
 	return _instance;
 }
 
-GrassBundle::GrassBundle()
-	: _grass(Vec3(0, 0, 0), Vec3(2, 2.5, 3), Vec3(3, 3, 3), Vec3(4, 0.5, 4))
+GrassBundle::GrassBundle(Object* parent)
+	: Object(parent)
 {
-
+    Grass* grass = new Grass(Vec3(0, 0, 0), Vec3(2, 2.5, 3), Vec3(3, 3, 3), Vec3(4, 0.5, 4), this);
 }
 
 GrassBundle::~GrassBundle()
 {
 
-}
-
-void GrassBundle::render()
-{
-	_grass.render();
 }
 
 } // namespace CGRA350

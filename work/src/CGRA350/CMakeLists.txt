@@ -8,6 +8,9 @@ set(sources
     "grass_bundle.h"
     "grass_bundle.cpp"
 
+    "object.h"
+    "object.cpp"
+
     "cpu_fluid_simulation.h"
     "cpu_fluid_simulation.cpp"
 

@@ -16,8 +16,8 @@
 
 namespace CGRA350 {
 
-Grass::Grass(Vec3 a, Vec3 b, Vec3 c, Vec3 d)
-	: _hasChanged(false)
+Grass::Grass(Vec3 a, Vec3 b, Vec3 c, Vec3 d, Object* parent)
+	: Object(parent)
 	, _vertices(nullptr)
 	, _VAO(0)
 	, _VBO(0)
