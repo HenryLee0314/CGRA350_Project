@@ -22,6 +22,10 @@
 #include "fluid_grid.h"
 #include "grass_parameters.h"
 #include "grass_bundle.h"
+#include "floor.h"
+#include "light.h"
+#include "floor_shadow.h"
+#include "shader_second_pass.h"
 
 #define MAXPARTICLES 100000
 
@@ -49,14 +53,12 @@ Application::Application(GLFWwindow *window)
 	, _grassShader(CGRA_SRCDIR "/res/shaders/vertexShader/grass.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/grass.fs", CGRA_SRCDIR "/res/shaders/geometryShader/grass.gs", CGRA_SRCDIR "/res/shaders/tessellationControlShader/grass.tcs", CGRA_SRCDIR "/res/shaders/tessellationEvaluationShader/grass.tes")
 	, _fluidShader(CGRA_SRCDIR "/res/shaders/vertexShader/fluid.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/fluid.fs")
 
-	
 
-	,_particles(Particles(MAXPARTICLES))
+
+	, _particles(Particles(MAXPARTICLES))
 	, _enable_particles(false)
 
 {
-
-	m_lightPosition = glm::vec3(3.0f, 3.0f, 3.0f);
 
 	// OpenclManager::getInstance();
 
@@ -89,7 +91,7 @@ void Application::render() {
 	mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
 
 	// view matrix
-	 mat4 view2 = translate(mat4(1), vec3(0, 0, -m_distance))
+	mat4 view2 = translate(mat4(1), vec3(0, 0, -m_distance))
 	             * rotate(mat4(1), m_pitch, vec3(1, 0, 0))
 	             * rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
 
@@ -111,6 +113,12 @@ void Application::render() {
 	// draw the model
 	//m_model.draw(view, proj);
 
+	GrassBundle::getInstance()->update();
+
+	FloorShadow::getInstance()->renderShadow();
+
+	//Floor::getInstance()->render();
+
 	_grassShader.use();
 	_grassShader.setMat4("model", model);
 	_grassShader.setMat4("view", view);
@@ -118,7 +126,7 @@ void Application::render() {
 
 	_grassShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
 	_grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-	_grassShader.setVec3("lightPos", m_lightPosition);
+	_grassShader.setVec3("lightPos", Light::getInstance()->getPosition());
 	_grassShader.setVec3("viewPos", _camera.getPosition());
 	GrassBundle::getInstance()->render();
 
@@ -134,7 +142,7 @@ void Application::render() {
 
 	_fluidShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
 	_fluidShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-	_fluidShader.setVec3("lightPos", m_lightPosition);
+	_fluidShader.setVec3("lightPos", Light::getInstance()->getPosition());
 	_fluidShader.setVec3("viewPos", _camera.getPosition());
 	FluidGrid::getInstance()->render();
 	glEnable(GL_DEPTH_TEST);
@@ -143,8 +151,11 @@ void Application::render() {
 	if (_enable_particles) {
 		_particles.setColor(m_colorSand);
 		_particles.draw(view2, proj, m_distance, m_per_millisecond);
-		
+
 	}
+
+	SecondPassShader::getInstance()->useFloorShader(view, proj, _camera.getPosition());
+	FloorShadow::getInstance()->render();
 
 }
 
@@ -170,6 +181,9 @@ void Application::renderGUI() {
 	ImGui::SameLine();
 	if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
 
+	ImGui::Separator();
+	Light::getInstance()->renderGUI();
+	ImGui::Separator();
 
 	if (ImGui::Button("Particles")) {
 		_enable_particles = !_enable_particles;

@@ -32,6 +32,14 @@ void Object::renderGUI()
 	}
 }
 
+void Object::update()
+{
+	std::vector<std::shared_ptr<Object>>::iterator iter;
+	for (iter = _children.begin(); iter != _children.end(); iter++) {
+		(*iter)->update();
+	}
+}
+
 
 void Object::addChild(Object* child)
 {

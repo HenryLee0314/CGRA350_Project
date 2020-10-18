@@ -20,6 +20,8 @@ public:
 
 	virtual void renderGUI();
 
+	virtual void update();
+
 private:
 	Object* _parent;
 	std::vector<std::shared_ptr<Object>> _children;
