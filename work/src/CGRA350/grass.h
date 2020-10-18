@@ -4,32 +4,28 @@
 #include <cstdint>
 
 #include "vector.h"
+#include "object.h"
 
 namespace CGRA350 {
 
-class Grass
+class Grass : public Object
 {
 public:
-	Grass(Vec3 a, Vec3 b, Vec3 c, Vec3 d);
+	Grass(Vec3 a, Vec3 b, Vec3 c, Vec3 d, Object* parent = nullptr);
 
 	~Grass();
 
-	void renderGUI();
+	void update();
 
 	void render();
 
 private:
-	void update();
+	void updateGlData();
 
 private:
 	const static size_t VERTICES_SIZE = 4;
-	static float _sigma; // drag coefficient
-	static float _k_tip; // stiffness coefficient
-	static float _angle_coefficient;
 
 	float _static_angle;
-
-	bool _hasChanged;
 
 	Vec3* _vertices;
 
