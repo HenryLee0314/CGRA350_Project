@@ -18,11 +18,11 @@ GrassParameters* GrassParameters::getInstance()
 }
 
 GrassParameters::GrassParameters()
-    : Ws_coefficient(10000)
-    , Rs_coefficient(10)
-	, Wb_coefficient(10)
-	, Rb_coefficient(10)
-	, Angle_coefficient(0.1)
+    : Ws_coefficient(3000)
+    , Rs_coefficient(152)
+	, Wb_coefficient(1000)
+	, Rb_coefficient(500)
+	, Angle_coefficient(0.005)
 {
 
 }

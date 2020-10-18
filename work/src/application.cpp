@@ -68,6 +68,7 @@ Application::Application(GLFWwindow *window)
 
 
 void Application::render() {
+	//system("clear");
 
 	// retrieve the window hieght
 	int width, height;

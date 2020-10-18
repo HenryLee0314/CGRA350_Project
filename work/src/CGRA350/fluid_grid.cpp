@@ -97,9 +97,6 @@ void FluidGrid::renderGUI()
 
 	if (ImGui::Button("Reset")) _cube.GPU_FluidCubeReset();
 
-	ImGui::SliderFloat("Diffusion", &_diffusion, 0.000f, 0.1f);
-	ImGui::SliderFloat("Viscosity", &_viscosity, 0.000f, 0.1f);
-
 	ImGui::SliderFloat("Amount", &amount, 0.0f, 500.0f);
 
 	ImGui::SliderFloat("angle", &angle, 0.0f, 2 * 3.1415926535897932);
