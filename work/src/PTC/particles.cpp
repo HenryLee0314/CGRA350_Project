@@ -12,6 +12,8 @@
 #include "cgra/cgra_shader.hpp"
 #include "PTC/util.hpp"
 
+#include "fluid_grid.h"
+
 using namespace std;
 using namespace cgra;
 using namespace glm;
@@ -23,13 +25,17 @@ namespace PTC {
 	std::uniform_real_distribution<double> distribution(-1, 1);
 	std::uniform_real_distribution<double> distributionPositive(0, 1);
 
+	float clip(float n, float lower, float upper) {
+		return std::max(lower, std::min(n, upper));
+	}
+
 	Particles::Particles(int particleSize) :m_particleSize(particleSize) {
 		//cout << "particleSize:" << particleSize;
 		particleContainer = new Particle[m_particleSize];
 		m_lastUsedParticle = 0;
 		
 		m_mainPosition = glm::vec3(0, 20.0f, -10.0f * distributionPositive(generator));
-		m_mainDir = glm::vec3(200.0f * distribution(generator), 0, 10.0f*distributionPositive(generator));
+		m_mainDir = glm::vec3(distribution(generator), 0, distributionPositive(generator));
 		
 		//cout << "mainPosition:" << m_mainPosition.x << "," << m_mainPosition.y << "," << m_mainPosition.z << endl;
 		//cout << "m_mainDir:" << m_mainDir.x << "," << m_mainDir.y << "," << m_mainDir.z << endl;
@@ -113,7 +119,7 @@ namespace PTC {
 		// We will need the camera's position in order to sort the particles
 		// w.r.t the camera's distance.
 		glm::vec3 CameraPosition(glm::inverse(view)[3]);
-		cout << "cameraPosition(" << CameraPosition.x << "," << CameraPosition.y << "," << CameraPosition.z << ")";
+		//cout << "cameraPosition(" << CameraPosition.x << "," << CameraPosition.y << "," << CameraPosition.z << ")";
 		glm::mat4 ViewProjectionMatrix = proj * view;
 
 		// Generate 10 new particule each millisecond,
@@ -139,12 +145,11 @@ namespace PTC {
 
 			particleContainer[particleIndex].pos = m_mainPosition + randompos;
 			
-
 			//speed
 			glm::vec3 randomdir = glm::vec3(
-				20.0f * distribution(generator),
-				1.0f * distribution(generator),
-				1.0f * distribution(generator)
+				0.2f * distribution(generator),
+				0.2f * distribution(generator),
+				0.2f * distribution(generator)
 				);
 
 			particleContainer[particleIndex].speed = m_mainDir + randomdir ;
@@ -176,17 +181,42 @@ namespace PTC {
 				// Decrease life
 				p.life -= delta;
 				if (p.life > 0.0f) {
-
+					/*
 					// Simulate simple physics : gravity only, no collisions
 					p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 1000.0f;
 					p.pos += p.speed * (float)delta;
 					p.cameradistance = glm::length(p.pos - CameraPosition);
 					//cout << "p.cameradistance(" << p.cameradistance << ")" ;
 					//cout << "p.pos(" << p.pos.x << "," << p.pos.y << "," << p.pos.z << ")" << endl;
-					// Fill the GPU buffer
+					*/
+					CGRA350::FluidGrid *grid = CGRA350::FluidGrid::getInstance();
+					float x = clip(p.pos.x, -19.9f, 19.9f);
+					float y = clip(p.pos.y, 0.0f, 9.9f);
+					float z = clip(p.pos.z, -10.0f, 0.01f);
+
+					int idx = grid->getIndexFromPosition(x, y, z);
+					//CGRA350::Vec3 speedV = grid->getVelocity(idx) * (float)delta * 1000.0f;
+					CGRA350::Vec3 speedV = grid->getVelocity(idx);
+
+					//p.speed.x = speedV.x;
+					//p.speed.y = speedV.y - 9.81f * (float)delta * 1000.0f;
+					//p.speed.z = speedV.z;
+					//cout << "p.speed before(" << p.speed.x << "," << p.speed.y << "," << p.speed.z << ")" << endl;
+					//p.speed += glm::vec3(speedV.x, -0.98f + speedV.y, speedV.z) * (float)delta * 1000.0f;
+					p.speed = glm::vec3(speedV.x, -0.098f * (float)delta * 1000.0f + speedV.y, speedV.z);
+					//cout << "speedV (" << speedV.x << "," << speedV.y << "," << speedV.z << ")" << endl;
+					//cout << "p.speed after(" << p.speed.x << "," << p.speed.y << "," << p.speed.z << ")" << endl;
+					p.pos += (p.speed * 10.0f);
 					if (p.pos.y < 0.0f) {
 						p.life = 0.0f;
+						p.pos.y = 0.0f;
 					}
+					//cout << "p.speed = (" << p.speed.x << "," << p.speed.y << "," << p.speed.z << ")" << endl;
+					//p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 1000.0f;
+					//p.pos += p.speed * (float)delta;
+					
+					p.cameradistance = glm::length(p.pos - CameraPosition);
+
 					g_particle_position_size_data[4 * ParticlesCount + 0] = p.pos.x;
 					g_particle_position_size_data[4 * ParticlesCount + 1] = p.pos.y;
 					g_particle_position_size_data[4 * ParticlesCount + 2] = p.pos.z;
@@ -212,7 +242,6 @@ namespace PTC {
 
 		SortParticles();
 
-
 		cout << "ParticlesCount" << ParticlesCount << endl;
 		// Update the buffers that OpenGL uses for rendering.
 		glBindVertexArray(VAO);
@@ -224,7 +253,6 @@ namespace PTC {
 		glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
 		glBufferData(GL_ARRAY_BUFFER, m_particleSize * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
 		glBufferSubData(GL_ARRAY_BUFFER, 0, ParticlesCount * sizeof(GLubyte) * 4, g_particle_color_data);
-
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
