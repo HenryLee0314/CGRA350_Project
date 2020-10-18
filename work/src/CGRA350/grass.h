@@ -27,6 +27,8 @@ private:
 	static float _k_tip; // stiffness coefficient
 	static float _angle_coefficient;
 
+	float _static_angle;
+
 	bool _hasChanged;
 
 	Vec3* _vertices;
