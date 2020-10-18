@@ -180,7 +180,6 @@ void Application::renderGUI() {
 	}
 	ImGui::SameLine();
 	ImGui::Checkbox("colorSand", &m_colorSand);
-	ImGui::SameLine();
 	ImGui::SliderInt("# per millisecond,", &m_per_millisecond, 10000, 100000, "%.0f");
 	ImGui::Separator();
 

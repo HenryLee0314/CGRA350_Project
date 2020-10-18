@@ -132,7 +132,7 @@ namespace PTC {
 			particleContainer[particleIndex].life = 5.0f; // This particle will live 5 seconds.
 			//particleContainer[particleIndex].pos = glm::vec3(0.0f, 10.0f, -10.0f);
 			glm::vec3 randompos = glm::vec3(
-				20.0f * distribution(generator),
+				30.0f * distribution(generator),
 				1.0f * distribution(generator),
 				2.0f * distribution(generator)
 				);
