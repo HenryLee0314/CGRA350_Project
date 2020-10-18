@@ -11,8 +11,10 @@ set(sources
     "object.h"
     "object.cpp"
 
-    "cpu_fluid_simulation.h"
-    "cpu_fluid_simulation.cpp"
+    #"cpu_fluid_simulation.h"
+    #"cpu_fluid_simulation.cpp"
+    "gpu_fluid_simulation.h"
+    "gpu_fluid_simulation.cpp"
 
     "fluid_grid.h"
     "fluid_grid.cpp"
@@ -21,9 +23,6 @@ set(sources
     "opencl_manager.cpp"
     "opencl_task.h"
     "opencl_task.cpp"
-
-    "gpu_fluid_simulation.h"
-    "gpu_fluid_simulation.cpp"
 
     "scene.h"
     "scene.cpp"
