@@ -12,7 +12,6 @@
 
 #include "shader.h"
 #include "camera.h"
-#include "grass.h"
 
 #include "PTC/particles.hpp"
 
@@ -61,8 +60,6 @@ private:
 	//basic_model m_model;
 	CGRA350::Shader _grassShader;
 	CGRA350::Shader _fluidShader;
-
-	CGRA350::Grass _grass;
 
 	PTC::Particles _particles;
 	bool _enable_particles;
