@@ -160,8 +160,8 @@ namespace PTC {
 				particleContainer[particleIndex].g = colorV;
 				particleContainer[particleIndex].b = colorV;
 			}
-			particleContainer[particleIndex].a = (rand() % 256) / 3;
-			particleContainer[particleIndex].size = (rand() % 1000) / 8000.0f + 0.05f;
+			particleContainer[particleIndex].a = 255 - (rand() % 256) / 3;
+			particleContainer[particleIndex].size = (rand() % 100) / 8000.0f + 0.05f;
 		}
 
 
