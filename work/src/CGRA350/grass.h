@@ -14,18 +14,15 @@ public:
 
 	~Grass();
 
-	void renderGUI();
+	void update();
 
 	void render();
 
 private:
-	void update();
+	void updateGlData();
 
 private:
 	const static size_t VERTICES_SIZE = 4;
-	static float _sigma; // drag coefficient
-	static float _k_tip; // stiffness coefficient
-	static float _angle_coefficient;
 
 	float _static_angle;
 

@@ -3,6 +3,8 @@ set(sources
 
     "grass.h"
     "grass.cpp"
+    "grass_parameters.h"
+    "grass_parameters.cpp"
 
     "cpu_fluid_simulation.h"
     "cpu_fluid_simulation.cpp"

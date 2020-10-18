@@ -12,12 +12,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "fluid_grid.h"
+#include "grass_parameters.h"
 
 namespace CGRA350 {
-
-float Grass::_sigma = 10000;
-float Grass::_k_tip = 10;
-float Grass::_angle_coefficient = 0.1;
 
 Grass::Grass(Vec3 a, Vec3 b, Vec3 c, Vec3 d)
 	: _hasChanged(false)
@@ -45,7 +42,7 @@ Grass::Grass(Vec3 a, Vec3 b, Vec3 c, Vec3 d)
 
 	// _static_angle = atan(_G_static.z/_G_static.x);
 
-	update();
+	updateGlData();
 }
 
 Grass::~Grass()
@@ -57,18 +54,8 @@ Grass::~Grass()
 	_vertices = nullptr;
 }
 
-void Grass::renderGUI()
+void Grass::update()
 {
-	static float Wb_coefficient = 10;
-	static float Rb_coefficient = 10;
-	ImGui::SliderFloat("Ws coefficient [_sigma]", &_sigma, 0, 100000);
-	ImGui::SliderFloat("Rs coefficient [_k_tip]", &_k_tip, 0, 1000);
-
-	ImGui::SliderFloat("Wb coefficient []", &Wb_coefficient, 0, 1000);
-	ImGui::SliderFloat("Rb coefficient []", &Rb_coefficient, 0, 1000);
-
-	ImGui::SliderFloat("angle coefficient [_angle_coefficient]", &_angle_coefficient, 0, 0.1);
-
 	_G_current = _vertices[3] - _vertices[0];
 	_G_current = Vec3(_G_current.x, 0, _G_current.z);
 
@@ -93,20 +80,13 @@ void Grass::renderGUI()
 		CGRA_LOGD("[velocity] %f %f %f", _velocity[i].x, _velocity[i].y, _velocity[i].z);
 	}
 
-
-
-
-
-
-	// Ws
+	// ========== Ws ==========
 	for (size_t i = 0; i < VERTICES_SIZE - 1; ++i) {
-		_Ws[i] = _sigma * dot(_velocity[i + 1], _Ew[i]) * _Ew[i];
+		_Ws[i] = GrassParameters::getInstance()->getWsCoefficient() * dot(_velocity[i + 1], _Ew[i]) * _Ew[i];
 		CGRA_LOGD("[Ws] %d %f %f %f", i, _Ws[i].x , _Ws[i].y, _Ws[i].z);
 	}
 
-
-
-	// Rs
+	// ========== Rs ==========
 	float dotResult = dot(_G_static.normalize(), _G_current.normalize());
 	CGRA_LOGD("dot result: %f", dotResult);
 	if (dotResult <= -1) {
@@ -128,26 +108,18 @@ void Grass::renderGUI()
 			_Rs[i] = Vec3(0, 0, 0);
 		}
 		else {
-			_Rs[i] = _k_tip * _delta_theta_s * deltaG.normalize();
+			_Rs[i] = GrassParameters::getInstance()->getRsCoefficient() * _delta_theta_s * deltaG.normalize();
 		}
 		CGRA_LOGD("[Rs] %d %f %f %f", i, _Rs[i].x , _Rs[i].y, _Rs[i].z);
 	}
 
-
-
-	// Wb
+	// ========== Wb ==========
 	for (size_t i = 0; i < VERTICES_SIZE - 1; ++i) {
-		_Wb[i] = Wb_coefficient * dot(_velocity[i + 1], _En[i]) * _En[i];
+		_Wb[i] = GrassParameters::getInstance()->getWbCoefficient() * dot(_velocity[i + 1], _En[i]) * _En[i];
 		CGRA_LOGD("%d %f %f %f", i, _Wb[i].x , _Wb[i].y, _Wb[i].z);
 	}
 
-
-
-
-
-
-
-	// Rb
+	// ========== Rb ==========
 	for (size_t i = 0; i < VERTICES_SIZE - 1; ++i) {
 		CGRA_LOGD("%f %f %f -> %f %f %f", _Ee_static[i].x, _Ee_static[i].y, _Ee_static[i].z, _Ee[i].x, _Ee[i].y, _Ee[i].z);
 		float _delta_theta_b = 1;//acos(dot(_Ee_static[i], _Ee[i]));
@@ -157,7 +129,7 @@ void Grass::renderGUI()
 			_Rb[i] = Vec3(0, 0, 0);
 		}
 		else {
-			_Rb[i] = Rb_coefficient * _delta_theta_b * temp.normalize();
+			_Rb[i] = GrassParameters::getInstance()->getRbCoefficient() * _delta_theta_b * temp.normalize();
 		}
 
 		CGRA_LOGD("[Rb] %f %f %f", _Rb[i].x , _Rb[i].y, _Rb[i].z);
@@ -211,7 +183,7 @@ void Grass::renderGUI()
 
 
 		//angle[i] = atan(w[i].z / (w[i].x != 0 ? w[i].x : 0.000001)) * _angle_coefficient;
-		angle[i] = ((w[i].z) + (w[i].x)) * _angle_coefficient;
+		angle[i] = ((w[i].z) + (w[i].x)) * GrassParameters::getInstance()->getAngleCoefficient();
 
 		CGRA_LOGD("angle %f", angle[i]);
 		rotation[i] = glm::rotate(rotation[i], angle[i], glm::vec3(0, 1, 0));
@@ -272,14 +244,10 @@ void Grass::renderGUI()
 	// }
 
 
-
-
-
-
-	update();
+	updateGlData();
 }
 
-void Grass::update()
+void Grass::updateGlData()
 {
 	glBindVertexArray(_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
@@ -292,6 +260,8 @@ void Grass::update()
 
 void Grass::render()
 {
+	update();
+
 	glBindVertexArray(_VAO);
 	glDrawArrays(GL_PATCHES, 0, VERTICES_SIZE);
 	glBindVertexArray(0);

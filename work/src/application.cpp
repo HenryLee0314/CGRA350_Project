@@ -20,6 +20,7 @@
 #include "opencl_manager.h"
 #include "opencl_task.h"
 #include "fluid_grid.h"
+#include "grass_parameters.h"
 
 #define MAXPARTICLES 100000
 
@@ -178,7 +179,7 @@ void Application::renderGUI() {
 	ImGui::Separator();
 
 	// example of how to use input boxes
-	_grass.renderGUI();
+	GrassParameters::getInstance()->renderGUI();
 
 	FluidGrid::getInstance()->renderGUI();
 
