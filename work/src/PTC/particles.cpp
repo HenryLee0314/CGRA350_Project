@@ -10,7 +10,7 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "cgra/cgra_shader.hpp"
-#include "ptc/util.hpp"
+#include "PTC/util.hpp"
 
 using namespace std;
 using namespace cgra;
