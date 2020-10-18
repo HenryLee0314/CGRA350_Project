@@ -14,6 +14,7 @@
 #include "camera.h"
 #include "grass.h"
 
+#include "PTC/particles.hpp"
 
 // Basic model that holds the shader, mesh and transform for drawing.
 // Can be copied and modified for adding in extra information for drawing
@@ -50,6 +51,7 @@ private:
 	bool m_show_axis = false;
 	bool m_show_grid = false;
 	bool m_showWireframe = false;
+	bool m_colorSand = false;
 
 	glm::vec3 m_lightPosition;
 
@@ -62,6 +64,9 @@ private:
 
 	CGRA350::Grass _grass;
 
+	PTC::Particles _particles;
+	bool _enable_particles;
+	int m_per_millisecond = 10;
 public:
 	// setup
 	Application(GLFWwindow *);

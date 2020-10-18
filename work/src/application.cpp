@@ -21,12 +21,13 @@
 #include "opencl_task.h"
 #include "fluid_grid.h"
 
+#define MAXPARTICLES 100000
 
 using namespace std;
 using namespace cgra;
 using namespace glm;
 using namespace CGRA350;
-
+using namespace PTC;
 
 // void basic_model::draw(const glm::mat4 &view, const glm::mat4 proj) {
 // 	mat4 modelview = view * modelTransform;
@@ -45,7 +46,12 @@ Application::Application(GLFWwindow *window)
 	, _camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f))
 	, _grassShader(CGRA_SRCDIR "/res/shaders/vertexShader/grass.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/grass.fs", CGRA_SRCDIR "/res/shaders/geometryShader/grass.gs", CGRA_SRCDIR "/res/shaders/tessellationControlShader/grass.tcs", CGRA_SRCDIR "/res/shaders/tessellationEvaluationShader/grass.tes")
 	, _fluidShader(CGRA_SRCDIR "/res/shaders/vertexShader/fluid.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/fluid.fs")
+
 	, _grass(Vec3(0, 0, 0), Vec3(2, 2.5, 3), Vec3(3, 3, 3), Vec3(4, 0.5, 4))
+
+	,_particles(Particles(MAXPARTICLES))
+	, _enable_particles(false)
+
 {
 
 	m_lightPosition = glm::vec3(3.0f, 3.0f, 3.0f);
@@ -80,9 +86,9 @@ void Application::render() {
 	mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
 
 	// view matrix
-	// mat4 view = translate(mat4(1), vec3(0, 0, -m_distance))
-	//             * rotate(mat4(1), m_pitch, vec3(1, 0, 0))
-	//             * rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
+	 mat4 view2 = translate(mat4(1), vec3(0, 0, -m_distance))
+	             * rotate(mat4(1), m_pitch, vec3(1, 0, 0))
+	             * rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
 
 	_camera.setYaw(m_yaw);
 	_camera.setPitch(m_pitch);
@@ -99,10 +105,8 @@ void Application::render() {
 	(m_showWireframe) ? glEnable(GL_PROGRAM_POINT_SIZE) : glDisable(GL_PROGRAM_POINT_SIZE);
 
 
-
 	// draw the model
 	//m_model.draw(view, proj);
-
 
 	_grassShader.use();
 	_grassShader.setMat4("model", model);
@@ -132,6 +136,13 @@ void Application::render() {
 	FluidGrid::getInstance()->render();
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+
+	if (_enable_particles) {
+		_particles.setColor(m_colorSand);
+		_particles.draw(view2, proj, m_distance, m_per_millisecond);
+		
+	}
+
 }
 
 
@@ -156,6 +167,13 @@ void Application::renderGUI() {
 	ImGui::SameLine();
 	if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
 
+
+	if (ImGui::Button("Particles")) {
+		_enable_particles = !_enable_particles;
+	}
+	ImGui::SameLine();
+	ImGui::Checkbox("colorSand", &m_colorSand);
+	ImGui::SliderInt("# per millisecond,", &m_per_millisecond, 10000, 100000, "%.0f");
 
 	ImGui::Separator();
 

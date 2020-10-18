@@ -14,6 +14,7 @@ add_executable(${CGRA_PROJECT} ${sources})
 # ----------------------------- #
 add_subdirectory(cgra)
 add_subdirectory(YHL_base)
+add_subdirectory(PTC)
 add_subdirectory(CGRA350)
 
 #########################################################

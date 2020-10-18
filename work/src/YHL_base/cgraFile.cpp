@@ -103,6 +103,9 @@ bool cgraFile::read(std::string& content) {
         buff[m_size] = '\0';
 
         readSize = fread(buff, sizeof(char), m_size, m_file);
+        content = std::string(buff, readSize);
+        CGRA_FREE(buff);
+        /*
         if (static_cast<long>(readSize) == m_size && readSize >= 0 && m_size >= 0) {
             // // CGRA_LOGD("read success, size(%zu), buff(\n%s\n)", readSize, buff);
             content = std::string(buff, readSize);
@@ -113,7 +116,7 @@ bool cgraFile::read(std::string& content) {
             CGRA_FREE(buff);
             break;
         }
-
+        */
         close();
         CGRA_ACTIVITY_END(FILE);
         return true;
