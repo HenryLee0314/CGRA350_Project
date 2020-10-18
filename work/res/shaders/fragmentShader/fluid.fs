@@ -2,7 +2,7 @@
 out vec4 FragColor;
 
 in float vsDensity;
-//n vec3 vsFragPos;
+in vec3 vsVelocity;
 
 uniform vec3 objectColor;
 uniform vec3 lightColor;
@@ -28,6 +28,6 @@ void main()
 	// vec3 result = (ambient + diffuse + specular) * objectColor;
 
  //    FragColor = vec4(result, 1.0);
-    vec3 color = vec3(1, 1, 1) * vsDensity;
+    vec3 color = vsVelocity;// * vsDensity;
     FragColor =vec4(color, vsDensity);
 }

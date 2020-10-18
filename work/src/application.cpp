@@ -19,6 +19,7 @@
 #include "cgra_log.h"
 #include "opencl_manager.h"
 #include "opencl_task.h"
+#include "fluid_grid.h"
 
 
 using namespace std;
@@ -44,9 +45,7 @@ Application::Application(GLFWwindow *window)
 	, _camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f))
 	, _grassShader(CGRA_SRCDIR "/res/shaders/vertexShader/grass.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/grass.fs", CGRA_SRCDIR "/res/shaders/geometryShader/grass.gs", CGRA_SRCDIR "/res/shaders/tessellationControlShader/grass.tcs", CGRA_SRCDIR "/res/shaders/tessellationEvaluationShader/grass.tes")
 	, _fluidShader(CGRA_SRCDIR "/res/shaders/vertexShader/fluid.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/fluid.fs")
-	, _fluidGrid()
-	, _enable_grass(true)
-	, _enable_fluidGrid(false)
+	, _grass(Vec3(0, 0, 0), Vec3(2, 2.5, 3), Vec3(3, 3, 3), Vec3(4, 0.5, 4))
 {
 
 	m_lightPosition = glm::vec3(3.0f, 3.0f, 3.0f);
@@ -104,38 +103,35 @@ void Application::render() {
 	// draw the model
 	//m_model.draw(view, proj);
 
-	if (_enable_grass) {
-		_grassShader.use();
-		_grassShader.setMat4("model", model);
-		_grassShader.setMat4("view", view);
-		_grassShader.setMat4("projection", proj);
 
-		_grassShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-		_grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-		_grassShader.setVec3("lightPos", m_lightPosition);
-		_grassShader.setVec3("viewPos", _camera.getPosition());
-		_grass.render();
-	}
+	_grassShader.use();
+	_grassShader.setMat4("model", model);
+	_grassShader.setMat4("view", view);
+	_grassShader.setMat4("projection", proj);
 
-	if (_enable_fluidGrid) {
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		_fluidGrid.update();
+	_grassShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
+	_grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+	_grassShader.setVec3("lightPos", m_lightPosition);
+	_grassShader.setVec3("viewPos", _camera.getPosition());
+	_grass.render();
 
-		_fluidShader.use();
-		_fluidShader.setMat4("model", model);
-		_fluidShader.setMat4("view", view);
-		_fluidShader.setMat4("projection", proj);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	FluidGrid::getInstance()->update();
 
-		_fluidShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-		_fluidShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
-		_fluidShader.setVec3("lightPos", m_lightPosition);
-		_fluidShader.setVec3("viewPos", _camera.getPosition());
-		_fluidGrid.render();
-		glEnable(GL_DEPTH_TEST);
-		glDisable(GL_BLEND);
-	}
+	_fluidShader.use();
+	_fluidShader.setMat4("model", model);
+	_fluidShader.setMat4("view", view);
+	_fluidShader.setMat4("projection", proj);
+
+	_fluidShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
+	_fluidShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+	_fluidShader.setVec3("lightPos", m_lightPosition);
+	_fluidShader.setVec3("viewPos", _camera.getPosition());
+	FluidGrid::getInstance()->render();
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 }
 
 
@@ -160,28 +156,13 @@ void Application::renderGUI() {
 	ImGui::SameLine();
 	if (ImGui::Button("Screenshot")) rgba_image::screenshot(true);
 
-	if (ImGui::Button("Grass")) {
-		_enable_grass = true;
-		_enable_fluidGrid = false;
-	}
-
-	if (ImGui::Button("Fluid Grid")) {
-		_enable_grass = false;
-		_enable_fluidGrid = true;
-	}
-
 
 	ImGui::Separator();
 
 	// example of how to use input boxes
-	if (_enable_grass) {
-		_grass.renderGUI();
-	}
+	_grass.renderGUI();
 
-	if (_enable_fluidGrid) {
-		_fluidGrid.renderGUI();
-
-	}
+	FluidGrid::getInstance()->renderGUI();
 
 	// finish creating window
 	ImGui::End();

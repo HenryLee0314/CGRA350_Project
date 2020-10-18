@@ -73,7 +73,7 @@ float Vec3::length() const {
 	return norm2(*this);
 }
 
-Vec3 Vec3::unit() const {
+Vec3 Vec3::normalize() const {
 	return (*this) / length();
 }
 
