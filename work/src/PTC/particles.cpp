@@ -18,6 +18,8 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
+#define MIN_PARTICLES_PER_FRAME  200
+#define MAX_PARTICLES_PER_FRAME  2000
 
 namespace PTC {
 	//random generator
@@ -28,13 +30,14 @@ namespace PTC {
 	float clip(float n, float lower, float upper) {
 		return std::max(lower, std::min(n, upper));
 	}
+	
 
 	Particles::Particles(int particleSize) :m_particleSize(particleSize) {
 		//cout << "particleSize:" << particleSize;
 		particleContainer = new Particle[m_particleSize];
 		m_lastUsedParticle = 0;
 		
-		m_mainPosition = glm::vec3(0, 20.0f, -10.0f * distributionPositive(generator));
+		m_mainPosition = glm::vec3(0, 20.0f, 0);
 		m_mainDir = glm::vec3(distribution(generator), 0, distributionPositive(generator));
 		
 		//cout << "mainPosition:" << m_mainPosition.x << "," << m_mainPosition.y << "," << m_mainPosition.z << endl;
@@ -126,8 +129,7 @@ namespace PTC {
 		// but limit this to 16 ms (60 fps), or if you have 1 long frame (1sec),
 		// newparticles will be huge and the next frame even longer.
 		int newparticles = (int)(delta * particles_per_millisecond);
-		if (newparticles < 2.0)
-			newparticles = 2;
+		newparticles = clip(newparticles, MIN_PARTICLES_PER_FRAME, MAX_PARTICLES_PER_FRAME);
 		//else if (newparticles > (int)(0.016f * 1000.0))
 		//	newparticles = (int)(0.016f * 1000.0);
 		cout << "delta:" << delta << ",newparticles:" << newparticles << endl;
@@ -138,9 +140,9 @@ namespace PTC {
 			particleContainer[particleIndex].life = 5.0f; // This particle will live 5 seconds.
 			//particleContainer[particleIndex].pos = glm::vec3(0.0f, 10.0f, -10.0f);
 			glm::vec3 randompos = glm::vec3(
-				30.0f * distribution(generator),
+				10.0f * distribution(generator),
 				1.0f * distribution(generator),
-				2.0f * distribution(generator)
+			        10.0f * distribution(generator)
 				);
 
 			particleContainer[particleIndex].pos = m_mainPosition + randompos;
@@ -190,9 +192,9 @@ namespace PTC {
 					//cout << "p.pos(" << p.pos.x << "," << p.pos.y << "," << p.pos.z << ")" << endl;
 					*/
 					CGRA350::FluidGrid *grid = CGRA350::FluidGrid::getInstance();
-					float x = clip(p.pos.x, -19.9f, 19.9f);
+					float x = clip(p.pos.x, -9.9f, 9.9f);
 					float y = clip(p.pos.y, 0.0f, 9.9f);
-					float z = clip(p.pos.z, -10.0f, 0.01f);
+					float z = clip(p.pos.z, -9.9f, 9.9f);
 
 					int idx = grid->getIndexFromPosition(x, y, z);
 					//CGRA350::Vec3 speedV = grid->getVelocity(idx) * (float)delta * 1000.0f;
