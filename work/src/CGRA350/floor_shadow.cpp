@@ -6,6 +6,10 @@
 
 #include "opengl.hpp"
 
+#include "cgra_log.h"
+#include "cgra_heap_calculator.h"
+#include "cgra_time_calculator.h"
+
 namespace CGRA350 {
 
 #ifdef __APPLE__
@@ -76,6 +80,8 @@ void FloorShadow::renderGUI()
 
 void FloorShadow::renderShadow()
 {
+	CGRA_ACTIVITY_START(TWO_PASS);
+
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -86,6 +92,8 @@ void FloorShadow::renderShadow()
     Floor::getInstance()->render();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	CGRA_ACTIVITY_END(TWO_PASS);
 }
 
 void FloorShadow::render()

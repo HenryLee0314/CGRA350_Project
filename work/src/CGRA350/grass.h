@@ -19,8 +19,7 @@ public:
 
 	void render();
 
-private:
-	void updateGlData();
+	virtual void updateGlData();
 
 private:
 	const static size_t VERTICES_SIZE = 4;

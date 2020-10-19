@@ -40,6 +40,14 @@ void Object::update()
 	}
 }
 
+void Object::updateGlData()
+{
+	std::vector<std::shared_ptr<Object>>::iterator iter;
+	for (iter = _children.begin(); iter != _children.end(); iter++) {
+		(*iter)->updateGlData();
+	}
+}
+
 
 void Object::addChild(Object* child)
 {

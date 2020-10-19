@@ -17,6 +17,9 @@
 #include "cgra/cgra_wavefront.hpp"
 
 #include "cgra_log.h"
+#include "cgra_heap_calculator.h"
+#include "cgra_time_calculator.h"
+
 #include "opencl_manager.h"
 #include "opencl_task.h"
 #include "fluid_grid.h"
@@ -109,6 +112,7 @@ void Application::render() {
 	glPolygonMode(GL_FRONT_AND_BACK, (m_showWireframe) ? GL_LINE : GL_FILL);
 	(m_showWireframe) ? glEnable(GL_PROGRAM_POINT_SIZE) : glDisable(GL_PROGRAM_POINT_SIZE);
 
+	CGRA_ACTIVITY_START(CGRA350);
 
 	// draw the model
 	//m_model.draw(view, proj);
@@ -154,6 +158,7 @@ void Application::render() {
 	SecondPassShader::getInstance()->useFloorShader(view, proj, _camera.getPosition());
 	FloorShadow::getInstance()->render();
 
+	CGRA_ACTIVITY_END(CGRA350);
 }
 
 

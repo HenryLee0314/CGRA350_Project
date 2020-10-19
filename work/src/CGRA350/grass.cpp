@@ -177,8 +177,6 @@ void Grass::updateGlData()
 
 void Grass::render()
 {
-	updateGlData();
-	
 	glBindVertexArray(_VAO);
 	glDrawArrays(GL_PATCHES, 0, VERTICES_SIZE);
 	glBindVertexArray(0);
