@@ -295,8 +295,6 @@ static void advect(int b, float *d, float *d0,  float *velocX, float *velocY, fl
 
 void CPU_FluidCubeStep(CPU_FluidCube *cube)
 {
-    CGRA_ACTIVITY_START(CPU_FLUID_SIM);
-
     int N          = cube->size;
     float visc     = cube->visc;
     float diff     = cube->diff;
@@ -327,8 +325,6 @@ void CPU_FluidCubeStep(CPU_FluidCube *cube)
 
     diffuse(0, s, density, diff, dt, 4, N);
     advect(0, density, s, Vx, Vy, Vz, dt, N);
-
-    CGRA_ACTIVITY_END(CPU_FLUID_SIM);
 }
 
 

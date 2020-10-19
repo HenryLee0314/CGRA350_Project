@@ -17,7 +17,7 @@ typedef enum moduleMember_s {
     GL_RENDER_VOL_DATA    = 8,
     OPENCL_INIT           = 9,
     OPENCL_TASK           = 10,
-    CPU_FLUID_SIM         = 11,
+    GRASS_UPDATE          = 11,
     GPU_FLUID_SIM         = 12,
     MAXIMUM               = 13
 } moduleMember_t;
@@ -34,7 +34,7 @@ static const std::string moduleMemberName[moduleMember_t::MAXIMUM] = {
     "GL_RENDER_VOL_DATA     ",
     "OPENCL_INIT            ",
     "OPENCL_TASK            ",
-    "CPU_FLUID_SIM          ",
+    "GRASS_UPDATE           ",
     "GPU_FLUID_SIM          "
 };
 

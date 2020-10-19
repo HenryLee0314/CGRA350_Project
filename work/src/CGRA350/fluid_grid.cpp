@@ -58,6 +58,12 @@ FluidGrid::~FluidGrid()
 
 int FluidGrid::getIndexFromPosition(float x, float y, float z)
 {
+	if (x > 10) x = 10;
+	if (y > 10) y = 10;
+	if (z > 10) z = 10;
+	if (x < -10) x = -10;
+	if (y < 0) y = 0;
+	if (z < -10) z = -10;
 	int N = _size;
 	float a = (x / _FIELD_RADIUS_ + 1) * (N / 2);
 	float b = (y / _FIELD_RADIUS_) * (N);
@@ -101,16 +107,16 @@ void FluidGrid::renderGUI()
 
 	ImGui::SliderFloat("angle", &angle, 0.0f, 2 * 3.1415926535897932);
 	ImGui::SliderFloat("Y", &Y, 0.5, _FIELD_RADIUS_ - 0.5);
-	
+
 	_position = Vec3((_FIELD_RADIUS_ - 0.5) * cos(angle), Y, (_FIELD_RADIUS_ - 0.5) * sin(angle));
-	CGRA_LOGD("_position %f %f %f", _position.x, _position.y, _position.z);
+	// CGRA_LOGD("_position %f %f %f", _position.x, _position.y, _position.z);
 	Vec3 position = getVec3IndexFromPosition(_position.x, _position.y, _position.z);
-	CGRA_LOGD("position %d %d %d", (int)position.x, (int)position.y, (int)position.z);
+	// CGRA_LOGD("position %d %d %d", (int)position.x, (int)position.y, (int)position.z);
 
 
 	_direction = Vec3(0, Y, 0) - _position;
 	_direction = _direction.normalize();
-	CGRA_LOGD("_direction %f %f %f", _direction.x, _direction.y, _direction.z);
+	// CGRA_LOGD("_direction %f %f %f", _direction.x, _direction.y, _direction.z);
 
 
 	ImGui::SliderFloat("Velocity Coefficient", &_velocity_coefficient, 0, 50.0f);
