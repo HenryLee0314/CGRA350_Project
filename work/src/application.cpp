@@ -20,6 +20,8 @@
 #include "opencl_manager.h"
 #include "opencl_task.h"
 #include "fluid_grid.h"
+#include "grass_parameters.h"
+#include "grass_bundle.h"
 
 #define MAXPARTICLES 100000
 
@@ -47,7 +49,7 @@ Application::Application(GLFWwindow *window)
 	, _grassShader(CGRA_SRCDIR "/res/shaders/vertexShader/grass.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/grass.fs", CGRA_SRCDIR "/res/shaders/geometryShader/grass.gs", CGRA_SRCDIR "/res/shaders/tessellationControlShader/grass.tcs", CGRA_SRCDIR "/res/shaders/tessellationEvaluationShader/grass.tes")
 	, _fluidShader(CGRA_SRCDIR "/res/shaders/vertexShader/fluid.vs", CGRA_SRCDIR "/res/shaders/fragmentShader/fluid.fs")
 
-	, _grass(Vec3(0, 0, 0), Vec3(2, 2.5, 3), Vec3(3, 3, 3), Vec3(4, 0.5, 4))
+	
 
 	,_particles(Particles(MAXPARTICLES))
 	, _enable_particles(false)
@@ -66,6 +68,7 @@ Application::Application(GLFWwindow *window)
 
 
 void Application::render() {
+	//system("clear");
 
 	// retrieve the window hieght
 	int width, height;
@@ -117,7 +120,7 @@ void Application::render() {
 	_grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
 	_grassShader.setVec3("lightPos", m_lightPosition);
 	_grassShader.setVec3("viewPos", _camera.getPosition());
-	_grass.render();
+	GrassBundle::getInstance()->render();
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -178,7 +181,7 @@ void Application::renderGUI() {
 	ImGui::Separator();
 
 	// example of how to use input boxes
-	_grass.renderGUI();
+	GrassParameters::getInstance()->renderGUI();
 
 	FluidGrid::getInstance()->renderGUI();
 

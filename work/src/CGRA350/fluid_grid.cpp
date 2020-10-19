@@ -33,22 +33,11 @@ FluidGrid::FluidGrid()
 	, _vertices(nullptr)
 	, _VAO(0)
 	, _VBO(0)
-#ifdef __CPU_FLUID_SIMULATION__
-	, _cube(nullptr)
-#else // __GPU_FLUID_SIMULATION__
 	, _cube(CGRA_SRCDIR "/res/openCL/fluid_simulation.cl", _size, _diffusion, _viscosity, _dt)
-#endif
 	, _position()
 	, _direction()
 	, _velocity_coefficient(50)
 {
-
-#ifdef __CPU_FLUID_SIMULATION__
-	_cube = CPU_FluidCubeCreate(_size, _diffusion, _viscosity, _dt);
-#else // __GPU_FLUID_SIMULATION__
-	// nothing
-#endif
-
 	glGenVertexArrays(1, &_VAO);
 	glGenBuffers(1, &_VBO);
 
@@ -57,12 +46,6 @@ FluidGrid::FluidGrid()
 
 FluidGrid::~FluidGrid()
 {
-#ifdef __CPU_FLUID_SIMULATION__
-	CPU_FluidCubeFree(_cube);
-#else // __GPU_FLUID_SIMULATION__
-	// nothing
-#endif
-
 	glDeleteVertexArrays(1, &_VAO);
 	glDeleteBuffers(1, &_VBO);
 
@@ -96,21 +79,13 @@ Vec3 FluidGrid::getVec3IndexFromPosition(float x, float y, float z)
 void FluidGrid::addDensity(int x, int y, int z, float amount)
 {
 	// CGRA_LOGD("%d %d %d", x, y, z);
-#ifdef __CPU_FLUID_SIMULATION__
-	CPU_FluidCubeAddDensity(_cube,  x,  y,  z,  amount);
-#else // __GPU_FLUID_SIMULATION__
 	_cube.GPU_FluidCubeAddDensity(x,  y,  z,  amount);
-#endif
 }
 
 void FluidGrid::addVelocity(int x, int y, int z, float amountX, float amountY, float amountZ)
 {
 	// CGRA_LOGD("%d %d %d %f %f %f", x, y, z, amountX, amountY, amountZ);
-#ifdef __CPU_FLUID_SIMULATION__
-	CPU_FluidCubeAddVelocity(_cube,  x,  y,  z,  amountX,  amountY,  amountZ);
-#else // __GPU_FLUID_SIMULATION__
 	_cube.GPU_FluidCubeAddVelocity(x,  y,  z,  amountX,  amountY,  amountZ);
-#endif
 }
 
 void FluidGrid::renderGUI()
@@ -120,14 +95,7 @@ void FluidGrid::renderGUI()
 
 	static float Y = 0.5;
 
-#ifdef __CPU_FLUID_SIMULATION__
-	if (ImGui::Button("Reset")) CPU_FluidCubeReset(_cube);
-#else // __GPU_FLUID_SIMULATION__
 	if (ImGui::Button("Reset")) _cube.GPU_FluidCubeReset();
-#endif
-
-	ImGui::SliderFloat("Diffusion", &_diffusion, 0.000f, 0.1f);
-	ImGui::SliderFloat("Viscosity", &_viscosity, 0.000f, 0.1f);
 
 	ImGui::SliderFloat("Amount", &amount, 0.0f, 500.0f);
 
@@ -150,25 +118,14 @@ void FluidGrid::renderGUI()
 	addDensity((int)position.x, (int)position.y, (int)position.z, amount);
 	addVelocity((int)position.x, (int)position.y, (int)position.z,  _direction.x * _velocity_coefficient, _direction.y * _velocity_coefficient, _direction.z * _velocity_coefficient);
 
-#ifdef __CPU_FLUID_SIMULATION__
-	_cube->diff = _diffusion;
-	_cube->visc = _viscosity;
-#else // __GPU_FLUID_SIMULATION__
 	_cube.setDiffusion(_diffusion);
 	_cube.setViscosity(_viscosity);
-#endif
-
-
 }
 
 void FluidGrid::update()
 {
 	CGRA_ACTIVITY_START(CALCULATE_VOL);
-#ifdef __CPU_FLUID_SIMULATION__
-	CPU_FluidCubeStep(_cube);
-#else // __GPU_FLUID_SIMULATION__
 	_cube.GPU_FluidCubeStep();
-#endif
 	CGRA_ACTIVITY_END(CALCULATE_VOL);
 
 	CGRA_ACTIVITY_START(GL_SET_RENDER_DATA);
@@ -181,17 +138,10 @@ void FluidGrid::update()
 				_vertices[(3 + 1 + 3) * index + 1] = (float(j) / (_size)) * _FIELD_RADIUS_;
 				_vertices[(3 + 1 + 3) * index + 2] = (float(k) / (_size / 2) - 1) * _FIELD_RADIUS_;
 
-#ifdef __CPU_FLUID_SIMULATION__
-				_vertices[(3 + 1 + 3) * index + 3] = _cube->density[index];
-				_vertices[(3 + 1 + 3) * index + 4] = _cube->Vx[index];
-				_vertices[(3 + 1 + 3) * index + 5] = _cube->Vy[index];
-				_vertices[(3 + 1 + 3) * index + 6] = _cube->Vz[index];
-#else // __GPU_FLUID_SIMULATION__
 				_vertices[(3 + 1 + 3) * index + 3] = _cube.getDensity()[index];
 				_vertices[(3 + 1 + 3) * index + 4] = _cube.getVx()[index];
 				_vertices[(3 + 1 + 3) * index + 5] = _cube.getVy()[index];
 				_vertices[(3 + 1 + 3) * index + 6] = _cube.getVz()[index];
-#endif
 			}
 		}
 	}

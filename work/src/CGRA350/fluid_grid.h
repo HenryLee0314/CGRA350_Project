@@ -4,13 +4,7 @@
 #include <cstdint>
 #include "vector.h"
 
-//#define __CPU_FLUID_SIMULATION__
-
-#ifdef __CPU_FLUID_SIMULATION__
-#include "cpu_fluid_simulation.h"
-#else
 #include "gpu_fluid_simulation.h"
-#endif
 
 namespace CGRA350 {
 
@@ -22,11 +16,7 @@ public:
 	void addVelocity(int x, int y, int z, float amountX, float amountY, float amountZ);
 
 	Vec3 getVelocity(int index) {
-#ifdef __CPU_FLUID_SIMULATION__
-		return Vec3(_cube->Vx[index], _cube->Vy[index], _cube->Vz[index]) * _cube->density[index];
-#else // __GPU_FLUID_SIMULATION__
 		return _cube.getVelocity(index) * _cube.getDensity()[index];
-#endif
 	}
 
 	void update();
@@ -63,11 +53,7 @@ private:
 	uint32_t _VAO;
 	uint32_t _VBO;
 
-#ifdef __CPU_FLUID_SIMULATION__
-	CPU_FluidCube* _cube;
-#else // __GPU_FLUID_SIMULATION__
 	GPU_FluidCube _cube;
-#endif
 
 	Vec3 _position;
 	Vec3 _direction;
