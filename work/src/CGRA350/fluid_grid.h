@@ -59,6 +59,8 @@ private:
 	Vec3 _direction;
 	float _velocity_coefficient;
 
+	bool _renderFluidGrid;
+
 };
 
 } // namespace CGRA350
