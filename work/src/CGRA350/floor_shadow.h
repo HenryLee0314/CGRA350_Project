@@ -31,11 +31,6 @@ protected:
 	static FloorShadow* _instance;
 
 private:
-
-	// uint32_t _VAO;
-	// uint32_t _VBO;
-	// uint32_t _EBO;
-
 	uint32_t _depthMapFBO;
 	uint32_t _depthMap;
 };
