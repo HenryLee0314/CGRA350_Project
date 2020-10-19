@@ -47,8 +47,9 @@ namespace PTC {
 		m_lastUsedParticle = 0;
 		
 		m_mainPosition = glm::vec3(0, 12.0f, 0);
-		m_mainDir = glm::vec3(distribution(generator), 0, distributionPositive(generator));
-		
+		//m_mainDir = glm::vec3(distribution(generator), 0, distributionPositive(generator));
+		m_mainDir = glm::vec3(0, 0, 0);
+
 		//cout << "mainPosition:" << m_mainPosition.x << "," << m_mainPosition.y << "," << m_mainPosition.z << endl;
 		//cout << "m_mainDir:" << m_mainDir.x << "," << m_mainDir.y << "," << m_mainDir.z << endl;
 
@@ -118,7 +119,7 @@ namespace PTC {
 		m_amount_per_milisecond = amount_per_milisecond;
 	}
 
-	void Particles::draw(const glm::mat4& view, const glm::mat4 proj, float m_distance, int particles_per_second) {
+	void Particles::draw(const glm::mat4& view, const glm::mat4 proj, float m_distance, int particles_per_second, int m_ratio) {
 		
 		static double lastTime = glfwGetTime();
 		// Clear the screen
@@ -155,8 +156,8 @@ namespace PTC {
 				0.2f * distribution(generator),
 				0.2f * distribution(generator)
 				);
-			particleContainer[particleIndex].speed = m_mainDir + randomdir ;
-
+			//particleContainer[particleIndex].speed = m_mainDir + randomdir ;
+			particleContainer[particleIndex].speed = vec3(0,0,0);
 			//generate a random color
 			if (m_isColor) {
 				particleContainer[particleIndex].r = rand() % 256;
@@ -175,6 +176,7 @@ namespace PTC {
 
 		// Simulate all particles
 		int ParticlesCount = 0;
+		int died = 0;
 		for (int i = 0; i < m_particleSize; i++) {
 			Particle& p = particleContainer[i]; // shortcut
 			if (p.life > 0.0f) {
@@ -182,7 +184,7 @@ namespace PTC {
 				// Decrease life
 				p.life -= delta;
 				if (p.life > 0.0f) {
-					// Simulate simple physics : gravity + velocity from environment, no collisions
+					// Simulate simple physics : gravity + acceleration from environment, no collisions
 					CGRA350::FluidGrid *grid = CGRA350::FluidGrid::getInstance();
 					float x = clip(p.pos.x, -9.9f, 9.9f);
 					float y = clip(p.pos.y, 0.0f, 9.9f);
@@ -194,20 +196,21 @@ namespace PTC {
 					//cout << "p.pos before(" << p.pos.x << "," << p.pos.y << "," << p.pos.z << ")" << endl;
 					//cout << "p.speed before(" << p.speed.x << "," << p.speed.y << "," << p.speed.z << ")" << endl;
 
-					p.speed.x = speedV.x * 1000.0f;
-					p.speed.y += (-0.49 * (float)delta + speedV.y * 1000.0f);
+					p.speed.x += speedV.x * m_ratio;
+					p.speed.y += (-0.49 * (float)delta);
 					//p.speed.y = speedV.y * 1000.0f;
-					p.speed.z = speedV.z * 1000.0f;
+					p.speed.z += speedV.z * m_ratio;
 					//cout << "speedV (" << speedV.x << "," << speedV.y << "," << speedV.z << ")" << endl;
 					//cout << "p.speed after(" << p.speed.x << "," << p.speed.y << "," << p.speed.z << ")" << endl;
 					if (p.pos.y < 0.0f) {
 						p.life = 0.0f;
 						p.pos.y = 0.0f;
+						p.cameradistance = -1.0f;
+						died++;
 					}
 					p.pos += p.speed * (float)delta;
 					//cout << "p.pos after(" << p.pos.x << "," << p.pos.y << "," << p.pos.z << ")" << endl;
 					p.cameradistance = glm::length(p.pos - CameraPosition);
-
 					g_particle_position_size_data[4 * ParticlesCount + 0] = p.pos.x;
 					g_particle_position_size_data[4 * ParticlesCount + 1] = p.pos.y;
 					g_particle_position_size_data[4 * ParticlesCount + 2] = p.pos.z;
@@ -229,8 +232,9 @@ namespace PTC {
 		}
 
 		SortParticles();
-
+		//cout << "ParticlesDied" << died << endl;
 		cout << "ParticlesCount" << ParticlesCount << endl;
+
 		// Update the buffers that OpenGL uses for rendering.
 		glBindVertexArray(VAO);
 
@@ -333,14 +337,14 @@ namespace PTC {
 	//find index of an unused particle starting from last found position. 
 	int Particles::FindUnusedParticle() {
 		for (int i = m_lastUsedParticle; i < m_particleSize; i++) {
-			if (particleContainer[i].life < 0) {
+			if (particleContainer[i].life <= 0) {
 				m_lastUsedParticle = i;
 				return i;
 			}
 		}
 
 		for (int i = 0; i < m_lastUsedParticle; i++) {
-			if (particleContainer[i].life < 0) {
+			if (particleContainer[i].life <= 0) {
 				m_lastUsedParticle = i;
 				return i;
 			}

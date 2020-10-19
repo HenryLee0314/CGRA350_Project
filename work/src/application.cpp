@@ -142,7 +142,7 @@ void Application::render() {
 
 	if (_enable_particles) {
 		_particles.setColor(m_colorSand);
-		_particles.draw(view2, proj, m_distance, m_per_second);
+		_particles.draw(view2, proj, m_distance, m_per_second, m_ratio);
 	}
 }
 
@@ -174,6 +174,7 @@ void Application::renderGUI() {
 	ImGui::SameLine();
 	ImGui::Checkbox("colorSand", &m_colorSand);
 	ImGui::SliderInt("# per second", &m_per_second, 100, 10000, "%.0f");
+	ImGui::SliderInt("wind force", &m_ratio, 1, 100, "%.0f");
 
 	ImGui::Separator();
 

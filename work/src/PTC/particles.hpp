@@ -51,10 +51,10 @@ namespace PTC {
 		Particles(int particleSize);
 		int FindUnusedParticle();
 		void SortParticles();
-		void draw(const glm::mat4& view, const glm::mat4 proj, float m_distance, int particles_per_second);
+		void draw(const glm::mat4& view, const glm::mat4 proj, float m_distance, int particles_per_second, int m_ratio);
 		void setColor(bool useColor);
 		void set_amout_per_milisecond(int amount_per_milisecond);
-		Particles::~Particles();
+		~Particles();
 	};
 
 

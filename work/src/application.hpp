@@ -64,6 +64,7 @@ private:
 	PTC::Particles _particles;
 	bool _enable_particles;
 	int m_per_second = 100;
+	int m_ratio = 5;
 public:
 	// setup
 	Application(GLFWwindow *);
