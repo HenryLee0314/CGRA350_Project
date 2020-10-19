@@ -4,9 +4,11 @@ layout(vertices = 4) out;
 
 // in vec3 vsFragPos[];
 // in vec2 vsTexCoord[];
+in vec3 vsNorm[];
 
 // out vec3 tcsFragPos[];
 // out vec2 tcsTexCoord[];
+out vec3 tcsNorm[];
 
 void main(void)
 {
@@ -21,4 +23,6 @@ void main(void)
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
     // tcsFragPos[gl_InvocationID] = vsFragPos[gl_InvocationID];
     // tcsTexCoord[gl_InvocationID] = vsTexCoord[gl_InvocationID];
+    
+    tcsNorm[gl_InvocationID] = vsNorm[gl_InvocationID];
 }
