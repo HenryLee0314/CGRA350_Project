@@ -133,9 +133,12 @@ void FluidGrid::renderGUI()
 
 void FluidGrid::update()
 {
-	CGRA_ACTIVITY_START(CALCULATE_VOL);
 	_cube.GPU_FluidCubeStep();
-	CGRA_ACTIVITY_END(CALCULATE_VOL);
+}
+
+void FluidGrid::wait()
+{
+    _cube.GPU_FluidCubeStepWait();
 }
 
 void FluidGrid::render()

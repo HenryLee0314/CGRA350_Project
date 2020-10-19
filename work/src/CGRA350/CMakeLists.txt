@@ -37,9 +37,6 @@ set(sources
     "opencl_task.h"
     "opencl_task.cpp"
 
-    "scene.h"
-    "scene.cpp"
-
 	"CMakeLists.txt"
 )
 

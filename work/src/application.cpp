@@ -120,8 +120,11 @@ void Application::render() {
 
 	GrassBundle::getInstance()->update();
 
+	FluidGrid::getInstance()->wait();
+
 	FloorShadow::getInstance()->renderShadow();
 
+    CGRA_ACTIVITY_START(GRASS_RENDER);
 	_grassShader.use();
 	_grassShader.setMat4("model", model);
 	_grassShader.setMat4("view", view);
@@ -132,6 +135,7 @@ void Application::render() {
 	_grassShader.setVec3("lightPos", Light::getInstance()->getPosition());
 	_grassShader.setVec3("viewPos", _camera.getPosition());
 	GrassBundle::getInstance()->render();
+	CGRA_ACTIVITY_END(GRASS_RENDER);
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);

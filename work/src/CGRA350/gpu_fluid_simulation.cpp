@@ -24,6 +24,7 @@ GPU_FluidCube::GPU_FluidCube(const char* const fileAddress, int size, float diff
 	, _bnd_2(2)
 	, _bnd_3(3)
 	, _iter(1)
+	, _enentPoint(nullptr)
 {
 	/**Step 7: Create kernel object */
 	k_diffuse_0 = clCreateKernel(program, "diffuse", NULL);
@@ -260,28 +261,35 @@ void GPU_FluidCube::GPU_FluidCubeStep()
 
 	/**Step 10: Running the kernel.*/
 	size_t global_work_size[3] = {static_cast<size_t>(_size), static_cast<size_t>(_size), static_cast<size_t>(_size)};
-	cl_event enentPoint;
+	_enentPoint = (cl_event*)CGRA_MALLOC(1 * sizeof(cl_event), CGRA350);
 
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_addDensity, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_addVelocity, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_addDensity, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_addVelocity, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
 
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_diffuse_1, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_diffuse_2, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_diffuse_3, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_diffuse_1, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_diffuse_2, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_diffuse_3, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
 
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_project_0, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_project_0, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
 
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_advect_1, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_advect_2, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_advect_3, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_advect_1, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_advect_2, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_advect_3, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
 
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_project_1, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_project_1, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
 
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_diffuse_0, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
-	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_advect_0, 3, NULL, global_work_size, NULL, 0, NULL, &enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_diffuse_0, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
+	clEnqueueNDRangeKernel(OpenclManager::getInstance()->getCommandQueue(), k_advect_0, 3, NULL, global_work_size, NULL, 0, NULL, _enentPoint);
 
-	clWaitForEvents(1, &enentPoint);
-	clReleaseEvent(enentPoint);
+
+    clEnqueueWaitForEvents(OpenclManager::getInstance()->getCommandQueue(), 1, _enentPoint);
+}
+
+void GPU_FluidCube::GPU_FluidCubeStepWait()
+{
+	clWaitForEvents(1, _enentPoint);
+	clReleaseEvent(_enentPoint[0]);
+	CGRA_FREE(_enentPoint);
 
 	// *Step 11: Read the cout put back to host memory.
 	clEnqueueReadBuffer(OpenclManager::getInstance()->getCommandQueue(), _cl_mem_density, CL_TRUE, 0, _size * _size * _size * sizeof(float), density, 0, NULL, NULL);
