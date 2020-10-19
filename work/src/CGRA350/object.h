@@ -22,7 +22,7 @@ public:
 
 	virtual void update();
 
-private:
+protected:
 	Object* _parent;
 	std::vector<std::shared_ptr<Object>> _children;
 	void addChild(Object* child);

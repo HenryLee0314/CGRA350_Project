@@ -112,12 +112,11 @@ void Application::render() {
 
 	// draw the model
 	//m_model.draw(view, proj);
+	FluidGrid::getInstance()->update();
 
 	GrassBundle::getInstance()->update();
 
 	FloorShadow::getInstance()->renderShadow();
-
-	//Floor::getInstance()->render();
 
 	_grassShader.use();
 	_grassShader.setMat4("model", model);
@@ -133,8 +132,6 @@ void Application::render() {
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	FluidGrid::getInstance()->update();
-
 	_fluidShader.use();
 	_fluidShader.setMat4("model", model);
 	_fluidShader.setMat4("view", view);

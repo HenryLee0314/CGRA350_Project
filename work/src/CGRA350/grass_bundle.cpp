@@ -7,6 +7,10 @@
 #include "cgra_heap_calculator.h"
 #include "cgra_time_calculator.h"
 
+#include "boost/bind.hpp"
+#include "boost/asio.hpp"
+#include "boost/asio/thread_pool.hpp"
+
 namespace CGRA350 {
 
 GrassBundle* GrassBundle::_instance = nullptr;
@@ -29,6 +33,8 @@ GrassBundle::GrassBundle(Object* parent)
 		for (int j = -7; j <= 7; ++j) {
 			createGrass(i + getRandomNumber(), j + getRandomNumber());
 			createGrass(i + getRandomNumber(), j + getRandomNumber());
+			// createGrass(i + getRandomNumber(), j + getRandomNumber());
+			// createGrass(i + getRandomNumber(), j + getRandomNumber());
 		}
 	}
 
@@ -57,8 +63,23 @@ void GrassBundle::createGrass(float x, float z)
 
 void GrassBundle::update()
 {
+	// boost::asio::thread_pool pool(4);
+
+	// CGRA_ACTIVITY_START(GRASS_UPDATE);
+	// std::vector<std::shared_ptr<Object>>::iterator iter;
+	// for (iter = _children.begin(); iter != _children.end(); iter++) {
+	// 	//(*iter)->update();
+	// 	boost::asio::post(pool, std::bind(&Object::update, *iter));
+	// }
+	// pool.join();
+	// CGRA_ACTIVITY_END(GRASS_UPDATE);
+
+
 	CGRA_ACTIVITY_START(GRASS_UPDATE);
-	Object::update();
+	std::vector<std::shared_ptr<Object>>::iterator iter;
+	for (iter = _children.begin(); iter != _children.end(); iter++) {
+		(*iter)->update();
+	}
 	CGRA_ACTIVITY_END(GRASS_UPDATE);
 }
 

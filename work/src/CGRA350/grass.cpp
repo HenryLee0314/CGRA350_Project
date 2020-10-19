@@ -161,7 +161,7 @@ void Grass::update()
 		}
 		// CGRA_LOGD("after update: vertices %f %f %f", _vertices[i].x, _vertices[i].y, _vertices[i].z);
 	}
-	updateGlData();
+	
 }
 
 void Grass::updateGlData()
@@ -177,6 +177,8 @@ void Grass::updateGlData()
 
 void Grass::render()
 {
+	updateGlData();
+	
 	glBindVertexArray(_VAO);
 	glDrawArrays(GL_PATCHES, 0, VERTICES_SIZE);
 	glBindVertexArray(0);
