@@ -21,7 +21,7 @@ GrassParameters::GrassParameters()
     : Ws_coefficient(100)
     , Rs_coefficient(10)
 	, Wb_coefficient(10)
-	, Rb_coefficient(10)
+	, Rb_coefficient(50)
 	, Angle_coefficient(0.005)
 {
 

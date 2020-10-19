@@ -122,7 +122,21 @@ void Grass::update()
 	// ========== Rb ==========
 	for (size_t i = 0; i < VERTICES_SIZE - 1; ++i) {
 		// CGRA_LOGD("[static] -> [current] %f %f %f -> %f %f %f", _Ee_static[i].x, _Ee_static[i].y, _Ee_static[i].z, _Ee[i].x, _Ee[i].y, _Ee[i].z);
-		float _delta_theta_b = 0.01;//acos(dot(_Ee_static[i], _Ee[i]));
+		float _delta_theta_b;
+
+		float RbDotResult = dot(_Ee_static[i].normalize(), _Ee[i].normalize());
+		// CGRA_LOGD("dot result: %f", dotResult);
+		if (RbDotResult <= -1) {
+			_delta_theta_b = 3.1415926;
+		}
+		else if (RbDotResult >= 1) {
+			_delta_theta_b = 0;
+		}
+		else {
+			_delta_theta_b = acos(RbDotResult);
+		}
+		_delta_theta_b *= 0.01;
+
 		// CGRA_LOGD("%zu _delta_theta_b %f", i, _delta_theta_b);
 		Vec3 temp = _Ee_static[i] - _Ee[i];
 		if (temp.length() == 0) {
@@ -150,7 +164,7 @@ void Grass::update()
 		// CGRA_LOGD("[F] %f %f %f", _F[i].x, _F[i].y, _F[i].z);
 
 		_F[i] = Vec3(0, -0.1, 0) + _F[i];
-        _F[i] = _F[i] / I[i];
+		_F[i] = _F[i] / I[i];
 
 		_vertices[i + 1] = _vertices[i + 1] + GrassParameters::getInstance()->getAngleCoefficient() * _F[i];
 		Vec3 dir = _vertices[i + 1] - _vertices[i];
@@ -161,7 +175,7 @@ void Grass::update()
 		}
 		// CGRA_LOGD("after update: vertices %f %f %f", _vertices[i].x, _vertices[i].y, _vertices[i].z);
 	}
-	
+
 }
 
 void Grass::updateGlData()
