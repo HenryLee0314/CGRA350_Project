@@ -123,6 +123,7 @@ void Application::render() {
 	FluidGrid::getInstance()->wait();
 
 	FloorShadow::getInstance()->renderShadow();
+	glViewport(0, 0, width, height);
 
     CGRA_ACTIVITY_START(GRASS_RENDER);
 	_grassShader.use();

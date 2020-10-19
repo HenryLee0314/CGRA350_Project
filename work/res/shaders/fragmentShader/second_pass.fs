@@ -24,7 +24,7 @@ void main()
     if (lightProjCoords.z <= 1.0) {
         float closestDepth = texture(shadowMap, lightProjCoords.xy).r;
         float currentDepth = lightProjCoords.z;
-        float bias = max(0.0005 * (1.0 - dot(normal, lightDir)), 0.00005);
+        float bias = max(0.00005 * (1.0 - dot(normal, lightDir)), 0.000005);
         shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
     }
 

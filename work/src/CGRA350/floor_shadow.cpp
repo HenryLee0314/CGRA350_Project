@@ -13,9 +13,9 @@
 namespace CGRA350 {
 
 #ifdef __APPLE__
-const GLuint SHADOW_WIDTH = 1280 * 2, SHADOW_HEIGHT = 800 * 2;
+const GLuint SHADOW_WIDTH = 2000 * 2, SHADOW_HEIGHT = 2000 * 2;
 #else
-const GLuint SHADOW_WIDTH = 1280, SHADOW_HEIGHT = 800;
+const GLuint SHADOW_WIDTH = 2000, SHADOW_HEIGHT = 2000;
 #endif
 
 FloorShadow* FloorShadow::_instance = nullptr;

@@ -177,9 +177,11 @@ void FluidGrid::render()
 		CGRA_ACTIVITY_END(GL_SET_OPENGL_BUFFER);
 
 		CGRA_ACTIVITY_START(GL_RENDER_VOL_DATA);
+		glEnable(GL_PROGRAM_POINT_SIZE);
 		glBindVertexArray(_VAO);
 		glDrawArrays(GL_POINTS, 0, _size * _size * _size);
 		glBindVertexArray(0);
+		glDisable(GL_PROGRAM_POINT_SIZE);
 		CGRA_ACTIVITY_END(GL_RENDER_VOL_DATA);
 	}
 }
