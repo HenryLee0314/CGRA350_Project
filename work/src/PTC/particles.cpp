@@ -18,8 +18,8 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
-#define MIN_PARTICLES_PER_FRAME  500
-#define MAX_PARTICLES_PER_FRAME  1000
+#define MIN_PARTICLES_PER_FRAME  200
+#define MAX_PARTICLES_PER_FRAME  2000
 
 namespace PTC {
 	//random generator
@@ -140,9 +140,9 @@ namespace PTC {
 			particleContainer[particleIndex].life = 5.0f; // This particle will live 5 seconds.
 			//particleContainer[particleIndex].pos = glm::vec3(0.0f, 10.0f, -10.0f);
 			glm::vec3 randompos = glm::vec3(
-				25.0f * distribution(generator),
+				10.0f * distribution(generator),
 				1.0f * distribution(generator),
-				-20.0f * distributionPositive(generator)
+			        10.0f * distribution(generator)
 				);
 
 			particleContainer[particleIndex].pos = m_mainPosition + randompos;
@@ -192,9 +192,9 @@ namespace PTC {
 					//cout << "p.pos(" << p.pos.x << "," << p.pos.y << "," << p.pos.z << ")" << endl;
 					*/
 					CGRA350::FluidGrid *grid = CGRA350::FluidGrid::getInstance();
-					float x = clip(p.pos.x, -19.9f, 19.9f);
+					float x = clip(p.pos.x, -9.9f, 9.9f);
 					float y = clip(p.pos.y, 0.0f, 9.9f);
-					float z = clip(p.pos.z, -10.0f, 0.01f);
+					float z = clip(p.pos.z, -9.9f, 9.9f);
 
 					int idx = grid->getIndexFromPosition(x, y, z);
 					//CGRA350::Vec3 speedV = grid->getVelocity(idx) * (float)delta * 1000.0f;
