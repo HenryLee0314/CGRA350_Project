@@ -34,13 +34,13 @@ GrassParameters::~GrassParameters()
 
 void GrassParameters::renderGUI()
 {
-	ImGui::SliderFloat("Ws coefficient", &Ws_coefficient, 0.001, 200);
-	ImGui::SliderFloat("Rs coefficient", &Rs_coefficient, 0.001, 200);
+	// ImGui::SliderFloat("Ws coefficient", &Ws_coefficient, 0.001, 200);
+	// ImGui::SliderFloat("Rs coefficient", &Rs_coefficient, 0.001, 200);
 
-	ImGui::SliderFloat("Wb coefficient", &Wb_coefficient, 0.001, 200);
-	ImGui::SliderFloat("Rb coefficient", &Rb_coefficient, 0.001, 200);
+	// ImGui::SliderFloat("Wb coefficient", &Wb_coefficient, 0.001, 200);
+	// ImGui::SliderFloat("Rb coefficient", &Rb_coefficient, 0.001, 200);
 
-	ImGui::SliderFloat("Angle coefficient", &Angle_coefficient, 0.001, 0.01);
+	// ImGui::SliderFloat("Angle coefficient", &Angle_coefficient, 0.001, 0.01);
 }
 
 } // namespace CGRA350

@@ -93,11 +93,6 @@ void Application::render() {
 	// projection matrix
 	mat4 proj = perspective(1.f, float(width) / height, 0.1f, 1000.f);
 
-	// view matrix
-	mat4 view2 = translate(mat4(1), vec3(0, 0, -m_distance))
-	             * rotate(mat4(1), m_pitch, vec3(1, 0, 0))
-	             * rotate(mat4(1), m_yaw,   vec3(0, 1, 0));
-
 	_camera.setYaw(m_yaw);
 	_camera.setPitch(m_pitch);
 	_camera.setDistance(m_distance);
@@ -156,7 +151,7 @@ void Application::render() {
 
 	if (_enable_particles) {
 		_particles.setColor(m_colorSand);
-		_particles.draw(view2, proj, m_distance, m_per_second, m_ratio);
+		_particles.draw(view, proj, m_distance, m_per_second, m_ratio);
 	}
 
 	SecondPassShader::getInstance()->useFloorShader(view, proj, _camera.getPosition());

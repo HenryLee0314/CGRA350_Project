@@ -58,12 +58,12 @@ namespace PTC {
 		glBindVertexArray(VAO);
 
 		shader_builder sb;
-		cout << "loading shader Particle.vertexshader";
+		// cout << "loading shader Particle.vertexshader";
 		sb.set_shader(GL_VERTEX_SHADER, CGRA_SRCDIR + std::string("//res//shaders//particleShader//Particle.vertexshader"));
-		cout << "done";
-		cout << "loading shader Particle.fragmentshader";
+		// cout << "done";
+		// cout << "loading shader Particle.fragmentshader";
 		sb.set_shader(GL_FRAGMENT_SHADER, CGRA_SRCDIR + std::string("//res//shaders//particleShader//Particle.fragmentshader"));
-		cout << "done";
+		// cout << "done";
 		GLuint shader = sb.build();
 		m_shader = shader;
 
@@ -80,9 +80,9 @@ namespace PTC {
 			particleContainer[i].life = -1.0f;
 			particleContainer[i].cameradistance = -1.0f;
 		}
-		cout << "loading loadDDS";
+		// cout << "loading loadDDS";
 		Texture = loadDDS((CGRA_SRCDIR + std::string("//res//textures//particle.DDS")).c_str());
-		cout << "done";
+		// cout << "done";
 
 		// The VBO containing the 4 vertices of the particles.
 		// Thanks to instancing, they will be shared by all particles.
@@ -138,7 +138,7 @@ namespace PTC {
 		// Generate new particles as required, but limit with min-max range
 		int newparticles = (int)(delta * particles_per_second);
 		newparticles = clip(newparticles, MIN_PARTICLES_PER_FRAME, MAX_PARTICLES_PER_FRAME);
-		cout << "delta:" << delta << ",newparticles:" << newparticles << endl;
+		// cout << "delta:" << delta << ",newparticles:" << newparticles << endl;
 		//random main speed when initialize.
 		for (int i = 0; i < newparticles; i++) {
 			int particleIndex = FindUnusedParticle();
@@ -233,7 +233,7 @@ namespace PTC {
 
 		SortParticles();
 		//cout << "ParticlesDied" << died << endl;
-		cout << "ParticlesCount" << ParticlesCount << endl;
+		cout << "ParticlesCount " << ParticlesCount << endl;
 
 		// Update the buffers that OpenGL uses for rendering.
 		glBindVertexArray(VAO);
