@@ -18,8 +18,8 @@ using namespace std;
 using namespace cgra;
 using namespace glm;
 
-#define MIN_PARTICLES_PER_FRAME  200
-#define MAX_PARTICLES_PER_FRAME  2000
+#define MIN_PARTICLES_PER_FRAME  1
+#define MAX_PARTICLES_PER_FRAME  200
 
 namespace PTC {
 	//random generator
@@ -31,13 +31,22 @@ namespace PTC {
 		return std::max(lower, std::min(n, upper));
 	}
 	
+	Particles::~Particles() {
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &base_vertex_buffer);
+		glDeleteBuffers(1, &particles_position_buffer);
+		glDeleteBuffers(1, &particles_color_buffer);
+		delete(g_particle_position_size_data);
+		delete(g_particle_color_data);
+		delete(particleContainer);
+	}
 
 	Particles::Particles(int particleSize) :m_particleSize(particleSize) {
 		//cout << "particleSize:" << particleSize;
 		particleContainer = new Particle[m_particleSize];
 		m_lastUsedParticle = 0;
 		
-		m_mainPosition = glm::vec3(0, 20.0f, 0);
+		m_mainPosition = glm::vec3(0, 12.0f, 0);
 		m_mainDir = glm::vec3(distribution(generator), 0, distributionPositive(generator));
 		
 		//cout << "mainPosition:" << m_mainPosition.x << "," << m_mainPosition.y << "," << m_mainPosition.z << endl;
@@ -109,51 +118,43 @@ namespace PTC {
 		m_amount_per_milisecond = amount_per_milisecond;
 	}
 
-	void Particles::draw(const glm::mat4& view, const glm::mat4 proj, float m_distance, int particles_per_millisecond) {
+	void Particles::draw(const glm::mat4& view, const glm::mat4 proj, float m_distance, int particles_per_second) {
 		
-		double lastTime = glfwGetTime();
+		static double lastTime = glfwGetTime();
 		// Clear the screen
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		double currentTime = glfwGetTime();
-		double delta = 1000.0f * (currentTime - lastTime); //milliseconds
-		lastTime = currentTime;
+		double delta = (currentTime - lastTime); //seconds
+		
 		//cout << "currentTime:" << currentTime << "lastTime:" << lastTime << "delta:" << delta << endl;
 		// We will need the camera's position in order to sort the particles
 		// w.r.t the camera's distance.
 		glm::vec3 CameraPosition(glm::inverse(view)[3]);
 		//cout << "cameraPosition(" << CameraPosition.x << "," << CameraPosition.y << "," << CameraPosition.z << ")";
 		glm::mat4 ViewProjectionMatrix = proj * view;
-
-		// Generate 10 new particule each millisecond,
-		// but limit this to 16 ms (60 fps), or if you have 1 long frame (1sec),
-		// newparticles will be huge and the next frame even longer.
-		int newparticles = (int)(delta * particles_per_millisecond);
+		
+		// Generate new particles as required, but limit with min-max range
+		int newparticles = (int)(delta * particles_per_second);
 		newparticles = clip(newparticles, MIN_PARTICLES_PER_FRAME, MAX_PARTICLES_PER_FRAME);
-		//else if (newparticles > (int)(0.016f * 1000.0))
-		//	newparticles = (int)(0.016f * 1000.0);
 		cout << "delta:" << delta << ",newparticles:" << newparticles << endl;
 		//random main speed when initialize.
-		
 		for (int i = 0; i < newparticles; i++) {
 			int particleIndex = FindUnusedParticle();
-			particleContainer[particleIndex].life = 5.0f; // This particle will live 5 seconds.
-			//particleContainer[particleIndex].pos = glm::vec3(0.0f, 10.0f, -10.0f);
+			particleContainer[particleIndex].life = 10.0f; // This particle will live 10 seconds.
 			glm::vec3 randompos = glm::vec3(
 				10.0f * distribution(generator),
 				1.0f * distribution(generator),
-			        10.0f * distribution(generator)
+			    10.0f * distribution(generator)
 				);
 
 			particleContainer[particleIndex].pos = m_mainPosition + randompos;
-			
 			//speed
 			glm::vec3 randomdir = glm::vec3(
 				0.2f * distribution(generator),
 				0.2f * distribution(generator),
 				0.2f * distribution(generator)
 				);
-
 			particleContainer[particleIndex].speed = m_mainDir + randomdir ;
 
 			//generate a random color
@@ -175,48 +176,36 @@ namespace PTC {
 		// Simulate all particles
 		int ParticlesCount = 0;
 		for (int i = 0; i < m_particleSize; i++) {
-
 			Particle& p = particleContainer[i]; // shortcut
-
 			if (p.life > 0.0f) {
 
 				// Decrease life
 				p.life -= delta;
 				if (p.life > 0.0f) {
-					/*
-					// Simulate simple physics : gravity only, no collisions
-					p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 1000.0f;
-					p.pos += p.speed * (float)delta;
-					p.cameradistance = glm::length(p.pos - CameraPosition);
-					//cout << "p.cameradistance(" << p.cameradistance << ")" ;
-					//cout << "p.pos(" << p.pos.x << "," << p.pos.y << "," << p.pos.z << ")" << endl;
-					*/
+					// Simulate simple physics : gravity + velocity from environment, no collisions
 					CGRA350::FluidGrid *grid = CGRA350::FluidGrid::getInstance();
 					float x = clip(p.pos.x, -9.9f, 9.9f);
 					float y = clip(p.pos.y, 0.0f, 9.9f);
 					float z = clip(p.pos.z, -9.9f, 9.9f);
 
 					int idx = grid->getIndexFromPosition(x, y, z);
-					//CGRA350::Vec3 speedV = grid->getVelocity(idx) * (float)delta * 1000.0f;
 					CGRA350::Vec3 speedV = grid->getVelocity(idx);
 
-					//p.speed.x = speedV.x;
-					//p.speed.y = speedV.y - 9.81f * (float)delta * 1000.0f;
-					//p.speed.z = speedV.z;
+					//cout << "p.pos before(" << p.pos.x << "," << p.pos.y << "," << p.pos.z << ")" << endl;
 					//cout << "p.speed before(" << p.speed.x << "," << p.speed.y << "," << p.speed.z << ")" << endl;
-					//p.speed += glm::vec3(speedV.x, -0.98f + speedV.y, speedV.z) * (float)delta * 1000.0f;
-					p.speed = glm::vec3(speedV.x, -0.098f * (float)delta * 1000.0f + speedV.y, speedV.z);
+
+					p.speed.x = speedV.x * 1000.0f;
+					p.speed.y += (-0.49 * (float)delta + speedV.y * 1000.0f);
+					//p.speed.y = speedV.y * 1000.0f;
+					p.speed.z = speedV.z * 1000.0f;
 					//cout << "speedV (" << speedV.x << "," << speedV.y << "," << speedV.z << ")" << endl;
 					//cout << "p.speed after(" << p.speed.x << "," << p.speed.y << "," << p.speed.z << ")" << endl;
-					p.pos += (p.speed * 10.0f);
 					if (p.pos.y < 0.0f) {
 						p.life = 0.0f;
 						p.pos.y = 0.0f;
 					}
-					//cout << "p.speed = (" << p.speed.x << "," << p.speed.y << "," << p.speed.z << ")" << endl;
-					//p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 1000.0f;
-					//p.pos += p.speed * (float)delta;
-					
+					p.pos += p.speed * (float)delta;
+					//cout << "p.pos after(" << p.pos.x << "," << p.pos.y << "," << p.pos.z << ")" << endl;
 					p.cameradistance = glm::length(p.pos - CameraPosition);
 
 					g_particle_position_size_data[4 * ParticlesCount + 0] = p.pos.x;
@@ -229,17 +218,14 @@ namespace PTC {
 					g_particle_color_data[4 * ParticlesCount + 1] = p.g;
 					g_particle_color_data[4 * ParticlesCount + 2] = p.b;
 					g_particle_color_data[4 * ParticlesCount + 3] = p.a;
-
-
 				}
 				else {
 					// Particles that just died will be put at the end of the buffer in SortParticles();
 					p.cameradistance = -1.0f;
 				}
-
 				ParticlesCount++;
-
 			}
+			
 		}
 
 		SortParticles();
@@ -267,16 +253,12 @@ namespace PTC {
 		// Set our "myTextureSampler" sampler to use Texture Unit 0
 		glUniform1i(TextureID, 0);
 
-		// Same as the billboards tutorial
+		//Set shader values
 		glUniform3f(CameraRight_worldspace_ID, view[0][0], view[1][0], view[2][0]);
 		//cout << "CameraRight_worldspace_ID" << view[0][0] << "," << view[1][0] << "," << view[2][0] << endl;
 		glUniform3f(CameraUp_worldspace_ID, view[0][1], view[1][1], view[2][1]);
 		//cout << "CameraUp_worldspace_ID" << view[0][1] << "," << view[1][1] << "," << view[2][1] << endl;
 		glUniformMatrix4fv(ViewProjMatrixID, 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
-
-		//mat4 modelview = view * modelTransform;
-		//glUniformMatrix4fv(glGetUniformLocation(m_shader, "uProjectionMatrix"), 1, false, value_ptr(proj));
-		//glUniformMatrix4fv(glGetUniformLocation(m_shader, "uModelViewMatrix"), 1, false, value_ptr(modelview));
 
 		// 1st attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -331,7 +313,7 @@ namespace PTC {
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(2);
-
+		lastTime = currentTime;
 
 	/*
 	delete[] g_particule_position_size_data;
@@ -344,6 +326,7 @@ namespace PTC {
 	glDeleteTextures(1, &Texture);
 	glDeleteVertexArrays(1, &VertexArrayID);
 	*/
+		glDisable(GL_BLEND);
 	}
 
 

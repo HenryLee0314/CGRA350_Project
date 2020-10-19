@@ -142,15 +142,12 @@ void Application::render() {
 
 	if (_enable_particles) {
 		_particles.setColor(m_colorSand);
-		_particles.draw(view2, proj, m_distance, m_per_millisecond);
-		
+		_particles.draw(view2, proj, m_distance, m_per_second);
 	}
-
 }
 
 
 void Application::renderGUI() {
-
 	// setup window
 	ImGui::SetNextWindowPos(ImVec2(5, 5), ImGuiSetCond_Once);
 	ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiSetCond_Once);
@@ -176,7 +173,7 @@ void Application::renderGUI() {
 	}
 	ImGui::SameLine();
 	ImGui::Checkbox("colorSand", &m_colorSand);
-	ImGui::SliderInt("# per millisecond,", &m_per_millisecond, 10000, 100000, "%.0f");
+	ImGui::SliderInt("# per second", &m_per_second, 100, 10000, "%.0f");
 
 	ImGui::Separator();
 
