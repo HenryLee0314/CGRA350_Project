@@ -52,8 +52,6 @@ private:
 	bool m_showWireframe = false;
 	bool m_colorSand = false;
 
-	glm::vec3 m_lightPosition;
-
 	CGRA350::Camera _camera;
 
 	// geometry

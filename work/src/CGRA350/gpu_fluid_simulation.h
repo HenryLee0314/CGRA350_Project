@@ -21,6 +21,8 @@ public:
 
 	void GPU_FluidCubeStep();
 
+	void GPU_FluidCubeStepWait();
+
 	void GPU_FluidCubeReset();
 
 	void setDiffusion(float diff);
@@ -64,6 +66,8 @@ private:
 	float* Vx;
 	float* Vy;
 	float* Vz;
+
+	cl_event* _enentPoint;
 
 	cl_mem _cl_mem_s;
 	cl_mem _cl_mem_density;

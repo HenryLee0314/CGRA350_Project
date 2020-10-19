@@ -37,6 +37,7 @@ FluidGrid::FluidGrid()
 	, _position()
 	, _direction()
 	, _velocity_coefficient(50)
+	, _renderFluidGrid(false)
 {
 	glGenVertexArrays(1, &_VAO);
 	glGenBuffers(1, &_VBO);
@@ -58,6 +59,12 @@ FluidGrid::~FluidGrid()
 
 int FluidGrid::getIndexFromPosition(float x, float y, float z)
 {
+	if (x > 10) x = 10;
+	if (y > 10) y = 10;
+	if (z > 10) z = 10;
+	if (x < -10) x = -10;
+	if (y < 0) y = 0;
+	if (z < -10) z = -10;
 	int N = _size;
 	float a = (x / _FIELD_RADIUS_ + 1) * (N / 2);
 	float b = (y / _FIELD_RADIUS_) * (N);
@@ -101,16 +108,16 @@ void FluidGrid::renderGUI()
 
 	ImGui::SliderFloat("angle", &angle, 0.0f, 2 * 3.1415926535897932);
 	ImGui::SliderFloat("Y", &Y, 0.5, _FIELD_RADIUS_ - 0.5);
-	
+
 	_position = Vec3((_FIELD_RADIUS_ - 0.5) * cos(angle), Y, (_FIELD_RADIUS_ - 0.5) * sin(angle));
-	CGRA_LOGD("_position %f %f %f", _position.x, _position.y, _position.z);
+	// CGRA_LOGD("_position %f %f %f", _position.x, _position.y, _position.z);
 	Vec3 position = getVec3IndexFromPosition(_position.x, _position.y, _position.z);
-	CGRA_LOGD("position %d %d %d", (int)position.x, (int)position.y, (int)position.z);
+	// CGRA_LOGD("position %d %d %d", (int)position.x, (int)position.y, (int)position.z);
 
 
 	_direction = Vec3(0, Y, 0) - _position;
 	_direction = _direction.normalize();
-	CGRA_LOGD("_direction %f %f %f", _direction.x, _direction.y, _direction.z);
+	// CGRA_LOGD("_direction %f %f %f", _direction.x, _direction.y, _direction.z);
 
 
 	ImGui::SliderFloat("Velocity Coefficient", &_velocity_coefficient, 0, 50.0f);
@@ -120,56 +127,63 @@ void FluidGrid::renderGUI()
 
 	_cube.setDiffusion(_diffusion);
 	_cube.setViscosity(_viscosity);
+
+	ImGui::Checkbox("Render Fluid Grid", &_renderFluidGrid);
 }
 
 void FluidGrid::update()
 {
-	CGRA_ACTIVITY_START(CALCULATE_VOL);
 	_cube.GPU_FluidCubeStep();
-	CGRA_ACTIVITY_END(CALCULATE_VOL);
+}
 
-	CGRA_ACTIVITY_START(GL_SET_RENDER_DATA);
-	for (int i = 0; i < _size; ++i) {
-		for (int j = 0; j < _size; ++j) {
-			for (int k = 0; k < _size; ++k) {
-				int N = _size;
-				int index = IX(i, j, k);
-				_vertices[(3 + 1 + 3) * index + 0] = (float(i) / (_size / 2) - 1) * _FIELD_RADIUS_;
-				_vertices[(3 + 1 + 3) * index + 1] = (float(j) / (_size)) * _FIELD_RADIUS_;
-				_vertices[(3 + 1 + 3) * index + 2] = (float(k) / (_size / 2) - 1) * _FIELD_RADIUS_;
-
-				_vertices[(3 + 1 + 3) * index + 3] = _cube.getDensity()[index];
-				_vertices[(3 + 1 + 3) * index + 4] = _cube.getVx()[index];
-				_vertices[(3 + 1 + 3) * index + 5] = _cube.getVy()[index];
-				_vertices[(3 + 1 + 3) * index + 6] = _cube.getVz()[index];
-			}
-		}
-	}
-	CGRA_ACTIVITY_END(GL_SET_RENDER_DATA);
-
-	CGRA_ACTIVITY_START(GL_SET_OPENGL_BUFFER);
-	glBindVertexArray(_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-	glBufferData(GL_ARRAY_BUFFER, _size * _size * _size * (3 + 1 + 3) * sizeof(float), _vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 1 + 3) * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, (3 + 1 + 3) * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, (3 + 1 + 3) * sizeof(float), (void*)(4 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	glBindVertexArray(0);
-	CGRA_ACTIVITY_END(GL_SET_OPENGL_BUFFER);
+void FluidGrid::wait()
+{
+    _cube.GPU_FluidCubeStepWait();
 }
 
 void FluidGrid::render()
 {
-	CGRA_ACTIVITY_START(GL_RENDER_VOL_DATA);
-	glBindVertexArray(_VAO);
-	glDrawArrays(GL_POINTS, 0, _size * _size * _size);
-	glBindVertexArray(0);
-	CGRA_ACTIVITY_END(GL_RENDER_VOL_DATA);
+	if (_renderFluidGrid) {
+		CGRA_ACTIVITY_START(GL_SET_RENDER_DATA);
+		for (int i = 0; i < _size; ++i) {
+			for (int j = 0; j < _size; ++j) {
+				for (int k = 0; k < _size; ++k) {
+					int N = _size;
+					int index = IX(i, j, k);
+					_vertices[(3 + 1 + 3) * index + 0] = (float(i) / (_size / 2) - 1) * _FIELD_RADIUS_;
+					_vertices[(3 + 1 + 3) * index + 1] = (float(j) / (_size)) * _FIELD_RADIUS_;
+					_vertices[(3 + 1 + 3) * index + 2] = (float(k) / (_size / 2) - 1) * _FIELD_RADIUS_;
+
+					_vertices[(3 + 1 + 3) * index + 3] = _cube.getDensity()[index];
+					_vertices[(3 + 1 + 3) * index + 4] = _cube.getVx()[index];
+					_vertices[(3 + 1 + 3) * index + 5] = _cube.getVy()[index];
+					_vertices[(3 + 1 + 3) * index + 6] = _cube.getVz()[index];
+				}
+			}
+		}
+		CGRA_ACTIVITY_END(GL_SET_RENDER_DATA);
+
+		CGRA_ACTIVITY_START(GL_SET_OPENGL_BUFFER);
+		glBindVertexArray(_VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+		glBufferData(GL_ARRAY_BUFFER, _size * _size * _size * (3 + 1 + 3) * sizeof(float), _vertices, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 1 + 3) * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, (3 + 1 + 3) * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, (3 + 1 + 3) * sizeof(float), (void*)(4 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glBindVertexArray(0);
+		CGRA_ACTIVITY_END(GL_SET_OPENGL_BUFFER);
+
+		CGRA_ACTIVITY_START(GL_RENDER_VOL_DATA);
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		glBindVertexArray(_VAO);
+		glDrawArrays(GL_POINTS, 0, _size * _size * _size);
+		glBindVertexArray(0);
+		glDisable(GL_PROGRAM_POINT_SIZE);
+		CGRA_ACTIVITY_END(GL_RENDER_VOL_DATA);
+	}
 }
-
-
 
 } // namespace CGRA350

@@ -11,6 +11,19 @@ set(sources
     "object.h"
     "object.cpp"
 
+    "floor.h"
+    "floor.cpp"
+    "floor_shadow.h"
+    "floor_shadow.cpp"
+
+    "light.h"
+    "light.cpp"
+
+    "shader_first_pass.h"
+    "shader_first_pass.cpp"
+    "shader_second_pass.h"
+    "shader_second_pass.cpp"
+
     #"cpu_fluid_simulation.h"
     #"cpu_fluid_simulation.cpp"
     "gpu_fluid_simulation.h"
@@ -23,9 +36,6 @@ set(sources
     "opencl_manager.cpp"
     "opencl_task.h"
     "opencl_task.cpp"
-
-    "scene.h"
-    "scene.cpp"
 
 	"CMakeLists.txt"
 )

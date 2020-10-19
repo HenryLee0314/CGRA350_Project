@@ -21,6 +21,8 @@ public:
 
 	void update();
 
+	void wait();
+
 	void render();
 
 	void renderGUI();
@@ -58,6 +60,8 @@ private:
 	Vec3 _position;
 	Vec3 _direction;
 	float _velocity_coefficient;
+
+	bool _renderFluidGrid;
 
 };
 

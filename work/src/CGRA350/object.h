@@ -20,7 +20,11 @@ public:
 
 	virtual void renderGUI();
 
-private:
+	virtual void update();
+
+	virtual void updateGlData();
+
+protected:
 	Object* _parent;
 	std::vector<std::shared_ptr<Object>> _children;
 	void addChild(Object* child);
