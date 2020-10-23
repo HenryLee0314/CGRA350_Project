@@ -8,6 +8,17 @@ layout(isolines, equal_spacing, ccw) in;
 // out vec3 tesFragPos;
 // out vec2 tesTexCoord;
 
+in vec3 tcsNorm[];
+in mat4 tcsLightSpaceMatrix[];
+// in vec4 tcsFragPosLightSpace[];
+
+out vec4 tesReducer;
+out vec4 tesThickness;
+out vec3 tesNorm;
+out vec4 tesDir;
+out mat4 tesLightSpaceMatrix;
+// out vec4 tesFragPosLightSpace;
+
 // vec4 interpolateV4(in vec4 v0, in vec4 v1, in vec4 v2, in vec4 v3)
 // {
 //     vec4 a = mix(v0, v1, gl_TessCoord.x);
@@ -55,4 +66,12 @@ void main()
 
     // tesFragPos = interpolateV3(tcsFragPos[0], tcsFragPos[1], tcsFragPos[2], tcsFragPos[3]);
     // tesTexCoord = interpolateV2(tcsTexCoord[0], tcsTexCoord[1], tcsTexCoord[2], tcsTexCoord[3]);
+
+    tesReducer = bezier(u, vec4(0), vec4(0.02), vec4(0.04), vec4(0.1));
+    tesThickness = bezier(u, vec4(0), vec4(0.2), vec4(0.35), vec4(0.4));
+    tesNorm = (bezier(u, vec4(tcsNorm[0],1), vec4(tcsNorm[1],1), vec4(tcsNorm[2],1), vec4(tcsNorm[3],1))).xyz;
+
+    tesDir = vec4(normalize(tcsNorm[0]-tcsNorm[1]),0.0);
+    // tesFragPosLightSpace = bezier(u, tcsFragPosLightSpace[0], tcsFragPosLightSpace[1], tcsFragPosLightSpace[2], tcsFragPosLightSpace[3]);
+    tesLightSpaceMatrix = tcsLightSpaceMatrix[0];
 }
