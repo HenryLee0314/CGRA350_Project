@@ -130,6 +130,10 @@ void Application::render() {
 	_grassShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
 	_grassShader.setVec3("lightPos", Light::getInstance()->getPosition());
 	_grassShader.setVec3("viewPos", _camera.getPosition());
+
+	_grassShader.setMat4("lightView", Light::getInstance()->getViewMatirx());
+	_grassShader.setMat4("lightProjection", Light::getInstance()->getProjectionMatrix());
+
 	GrassBundle::getInstance()->render();
 	CGRA_ACTIVITY_END(GRASS_RENDER);
 
